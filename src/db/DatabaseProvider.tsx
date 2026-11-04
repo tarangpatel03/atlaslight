@@ -1,5 +1,5 @@
 import { migrate } from 'drizzle-orm/op-sqlite/migrator';
-import React, { type PropsWithChildren, type ReactNode, useEffect, useState } from 'react';
+import { type PropsWithChildren, type ReactNode, useEffect, useState } from 'react';
 
 import { configureDatabase, db } from '@/db/client';
 import migrations from '@/db/migrations/migrations';
@@ -17,7 +17,7 @@ type Props = PropsWithChildren<{
  * Gate that blocks the app until the database is configured and migrated.
  * Wrap it outside the navigator so no screen can query an unmigrated DB.
  */
-export function DatabaseProvider({ children, fallback = null, renderError }: Props) {
+export const DatabaseProvider = ({ children, fallback = null, renderError }: Props): ReactNode => {
   const [status, setStatus] = useState<Status>({ state: 'loading' });
 
   useEffect(() => {
@@ -43,4 +43,4 @@ export function DatabaseProvider({ children, fallback = null, renderError }: Pro
   if (status.state === 'loading') return <>{fallback}</>;
   if (status.state === 'error') return <>{renderError?.(status.error) ?? null}</>;
   return <>{children}</>;
-}
+};

@@ -19,16 +19,16 @@ Atlaslight: an offline-first travel journal (portfolio app). Journeys and memori
 | #    | Checkpoint                                                                 | Status |
 | ---- | -------------------------------------------------------------------------- | ------ |
 | 1.1  | Rename to Atlaslight (com.atlaslight)                                      | done   |
-| 1.2  | Remove backend, auth and example code and their dependencies              | todo   |
-| 1.3  | Reshape store and navigation (baseApi, settings slice, no auth gate)       | todo   |
-| 1.4  | Move src/features/\* into the target layout (spec section 4)               | todo   |
-| 1.5  | Convert moved code to conventions (arrow functions, no `!`/`as`, JSDoc)    | todo   |
-| 1.6  | Fix remaining spec section 11 items (theme barrel kept, useLayout, fonts)  | todo   |
-| 1.7  | Approve first dependency batch (ask first)                                 | todo   |
-| 1.8  | Install approved batch and link native modules, rebuild                    | todo   |
-| 1.9  | Set up Jest for pure logic (exif tests)                                    | todo   |
-| 1.10 | Update CLAUDE.md, ARCHITECTURE, CONVENTIONS, ADDING_A_FEATURE, README      | todo   |
-| 1.11 | Final check: lint, typecheck, tests, device boot                           | todo   |
+| 1.2  | Remove backend, auth and example code and their dependencies              | done   |
+| 1.3  | Reshape store and navigation (baseApi, settings slice, no auth gate)       | done   |
+| 1.4  | Move src/features/\* into the target layout (spec section 4)               | done   |
+| 1.5  | Convert moved code to conventions (arrow functions, no `!`/`as`, JSDoc)    | done   |
+| 1.6  | Fix remaining spec section 11 items (theme barrel kept, useLayout, fonts)  | done   |
+| 1.7  | Approve first dependency batch (ask first)                                 | done   |
+| 1.8  | Install approved batch and link native modules, rebuild                    | done   |
+| 1.9  | Set up Jest for pure logic (exif tests)                                    | done   |
+| 1.10 | Update CLAUDE.md, ARCHITECTURE, CONVENTIONS, ADDING_A_FEATURE, README      | done   |
+| 1.11 | Final check: lint, typecheck, tests, device boot                           | in progress |
 
 ### Phase 2: UI kit + shell
 
@@ -69,3 +69,13 @@ Planned later.
 
 - Plan approved; checkpoint list written.
 - 1.1 done: renamed to Atlaslight (com.atlaslight); docs rename text left for 1.10.
+- 1.2 done: backend/auth/example code and 4 deps removed; tsc only fails on missing @types/jest until 1.8.
+- 1.3 done: store has baseApi + persisted settings slice; app opens into PlaceholderScreen (no auth).
+- 1.4 done: features/ moved to api/, services/, utils/, db/; tags in api/tags.ts. Remaining tsc errors: missing packages and @types/jest (1.8).
+- 1.5 done: moved code uses arrow functions, no `!`/`as` casts, return types. Left: 3 dev-only console warnings; useLayout.ts lint errors go away in 1.6.
+- 1.6 done: useLayout and breakpoints removed; layout values in useWindowClass; theme barrel kept; font file present.
+- 1.7 done: first batch approved (4 media packages, jest, @types/jest).
+- 1.8 done: 6 packages installed and autolinked; media permissions added (Android manifest, iOS Info.plist); tsc passes. Rebuild pending (manual).
+- 1.9 done: Jest (node env, @/ alias, no RN preset); `yarn test` runs the 10 exif tests, all pass.
+- 1.10 done: CLAUDE.md, ARCHITECTURE, CONVENTIONS, ADDING_A_FEATURE, README, SETUP.md match spec section 3.
+- 1.11 in progress: lint (0 errors), typecheck and 10 tests pass; device boot not verified (build could not start from my shell).

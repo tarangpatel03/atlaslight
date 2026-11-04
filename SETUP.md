@@ -94,22 +94,22 @@ Then run `npx react-native-asset` and rebuild the Android app.
 ## 7. Check
 
 - Imports use the `@/` alias; change them if your boilerplate uses a different one.
-- `src/shared/theme/mapStyle.ts`: open https://tiles.openfreemap.org/styles/dark in a browser and
+- `src/theme/mapStyle.ts`: open https://tiles.openfreemap.org/styles/dark in a browser and
   confirm its `sources` URL and `glyphs` match the constants at the top of the file.
 - Cascade deletes rely on `PRAGMA foreign_keys = ON` in `configureDatabase()`; keep that call.
 
 ## What's in here
 
-| Path | What |
-| --- | --- |
-| `src/db/` | Drizzle schema (journeys, stops, media, places, wishlist), op-sqlite client |
-| `src/app/providers/DatabaseProvider.tsx` | Runs pragmas + migrations before the app renders |
-| `src/store/` | RTK Query `baseApi` over the local DB, store wiring |
-| `src/features/journeys/journeysApi.ts` | Journey CRUD endpoints; deleting a journey also removes its files |
-| `src/features/stops/stopsApi.ts` | Memories: timeline, detail, create with media, edit, add/remove media, delete, optimistic reorder |
-| `src/features/media/services/` | Picker (library + camera), EXIF GPS/date parsing (+ Jest tests), file storage and thumbnails |
-| `src/shared/theme/` | Atlaslight tokens: colours, type, spacing, shadows, motion, map style, `useLayout` |
-| `drizzle.config.ts` | Migration generation config |
-| `react-native.config.js` | Font linking |
+| Path                          | What                                                                                |
+| ----------------------------- | ----------------------------------------------------------------------------------- |
+| `src/db/`                     | Drizzle schema (journeys, stops, media, places, wishlist), op-sqlite client         |
+| `src/db/DatabaseProvider.tsx` | Runs pragmas + migrations before the app renders                                    |
+| `src/api/`                    | RTK Query `baseApi` over the local DB, `tags.ts`, `journeys.api.ts`, `stops.api.ts` |
+| `src/store/`                  | Store wiring and settings slice                                                     |
+| `src/services/`               | Picker (library + camera), file storage and thumbnails                              |
+| `src/utils/exif.util.ts`      | EXIF GPS/date parsing (+ Jest tests)                                                |
+| `src/theme/`                  | Atlaslight tokens: colours, type, spacing, shadows, motion, map style               |
+| `drizzle.config.ts`           | Migration generation config                                                         |
+| `react-native.config.js`      | Font linking                                                                        |
 
-After installing: `yarn tsc --noEmit` and `yarn jest src/features/media`.
+After installing: `yarn typecheck` and `yarn test`.

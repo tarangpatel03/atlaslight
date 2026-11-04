@@ -27,12 +27,6 @@ export const sizes = {
   panelWidth: 400,
 } as const;
 
-/** Layout switches on window width (not device type) so foldables and split screen work. */
-export const breakpoints = {
-  tablet: 600,
-  tabletWide: 900,
-} as const;
-
 /**
  * Shadows use the `boxShadow` style prop (React Native 0.76+, New Architecture),
  * which renders the same on Android and iOS. On dark grounds elevation comes from

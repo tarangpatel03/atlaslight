@@ -1,11 +1,21 @@
 import { and, asc, count, eq, getTableColumns, inArray, max, sql } from 'drizzle-orm';
 
 import { db } from '@/db/client';
-import { type Media, type Mood, type Place, type Stop, media, places, stops } from '@/db/schema';
-import type { PickedMedia } from '@/features/media/services/picker';
-import { cleanPickerCache } from '@/features/media/services/picker';
-import { deleteMediaFiles, importMediaBatch } from '@/features/media/services/mediaStorage';
-import { baseApi, runDb } from '@/store/baseApi';
+import {
+  type Media,
+  type Mood,
+  type NewMedia,
+  type Place,
+  type Stop,
+  media,
+  places,
+  stops,
+} from '@/db/schema';
+import type { PickedMedia } from '@/services/picker.service';
+import { cleanPickerCache } from '@/services/picker.service';
+import { deleteMediaFiles, importMediaBatch } from '@/services/mediaStorage.service';
+import { baseApi, runDb } from '@/api/baseApi';
+import { TAGS } from '@/api/tags';
 
 export type StopListItem = Stop & {
   mediaCount: number;
@@ -41,18 +51,22 @@ export type RemoveMediaInput = { stopId: string; journeyId: string; mediaIds: st
 export type ReorderStopsInput = { journeyId: string; orderedIds: string[] };
 
 /** Tag for "the stops of one journey". */
-const journeyStopsTag = (journeyId: string) => ({ type: 'Stop' as const, id: `journey-${journeyId}` });
+const journeyStopsTag = (journeyId: string) => ({ type: TAGS.Stop, id: `journey-${journeyId}` });
 
 /** Everything that shows a stop count, a cover or a stat changes when stops change. */
 const stopChangeTags = (journeyId: string) => [
   journeyStopsTag(journeyId),
-  { type: 'Journey' as const, id: journeyId },
-  { type: 'Journey' as const, id: 'LIST' },
-  'Stats' as const,
+  { type: TAGS.Journey, id: journeyId },
+  { type: TAGS.Journey, id: 'LIST' },
+  TAGS.Stats,
 ];
 
-function toMediaRows(stopId: string, stored: Awaited<ReturnType<typeof importMediaBatch>>, startOrder = 0) {
-  return stored.map((m, i) => ({
+const toMediaRows = (
+  stopId: string,
+  stored: Awaited<ReturnType<typeof importMediaBatch>>,
+  startOrder = 0,
+): NewMedia[] =>
+  stored.map((m, i) => ({
     id: m.id,
     stopId,
     type: m.type,
@@ -67,13 +81,12 @@ function toMediaRows(stopId: string, stored: Awaited<ReturnType<typeof importMed
     sourceAssetId: m.sourceAssetId,
     sortOrder: startOrder + i,
   }));
-}
 
 export const stopsApi = baseApi.injectEndpoints({
-  endpoints: build => ({
+  endpoints: (build) => ({
     /** Timeline of one journey, in route order. */
     getStopsByJourney: build.query<StopListItem[], string>({
-      queryFn: journeyId =>
+      queryFn: (journeyId) =>
         runDb(() =>
           db
             .select({
@@ -93,12 +106,12 @@ export const stopsApi = baseApi.injectEndpoints({
         ),
       providesTags: (result, _e, journeyId) => [
         journeyStopsTag(journeyId),
-        ...(result ?? []).map(s => ({ type: 'Stop' as const, id: s.id })),
+        ...(result ?? []).map((s) => ({ type: TAGS.Stop, id: s.id })),
       ],
     }),
 
     getStop: build.query<StopDetail, string>({
-      queryFn: id =>
+      queryFn: (id) =>
         runDb(async () => {
           const [row] = await db
             .select({ stop: stops, place: places })
@@ -107,12 +120,16 @@ export const stopsApi = baseApi.injectEndpoints({
             .where(eq(stops.id, id));
           if (!row) throw new Error('Memory not found');
 
-          const items = await db.select().from(media).where(eq(media.stopId, id)).orderBy(asc(media.sortOrder));
+          const items = await db
+            .select()
+            .from(media)
+            .where(eq(media.stopId, id))
+            .orderBy(asc(media.sortOrder));
           return { ...row.stop, place: row.place, media: items };
         }),
       providesTags: (_r, _e, id) => [
-        { type: 'Stop', id },
-        { type: 'Media', id: `stop-${id}` },
+        { type: TAGS.Stop, id },
+        { type: TAGS.Media, id: `stop-${id}` },
       ],
     }),
 
@@ -125,7 +142,7 @@ export const stopsApi = baseApi.injectEndpoints({
         runDb(async () => {
           const stored = await importMediaBatch(picked, input.journeyId);
           try {
-            const stop = await db.transaction(async tx => {
+            const stop = await db.transaction(async (tx) => {
               const [{ next }] = await tx
                 .select({ next: max(stops.orderIndex) })
                 .from(stops)
@@ -152,13 +169,21 @@ export const stopsApi = baseApi.injectEndpoints({
     }),
 
     updateStop: build.mutation<Stop, UpdateStopInput>({
-      queryFn: ({ id, journeyId: _journeyId, ...changes }) =>
+      // Fields are listed one by one so `journeyId` (used only for cache tags) is never written.
+      queryFn: ({ id, title, note, mood, visitedAt, latitude, longitude, placeId }) =>
         runDb(async () => {
-          const [row] = await db.update(stops).set(changes).where(eq(stops.id, id)).returning();
+          const [row] = await db
+            .update(stops)
+            .set({ title, note, mood, visitedAt, latitude, longitude, placeId })
+            .where(eq(stops.id, id))
+            .returning();
           if (!row) throw new Error('Memory not found');
           return row;
         }),
-      invalidatesTags: (_r, _e, { id, journeyId }) => [{ type: 'Stop', id }, ...stopChangeTags(journeyId)],
+      invalidatesTags: (_r, _e, { id, journeyId }) => [
+        { type: TAGS.Stop, id },
+        ...stopChangeTags(journeyId),
+      ],
     }),
 
     addMediaToStop: build.mutation<Media[], AddMediaInput>({
@@ -166,7 +191,7 @@ export const stopsApi = baseApi.injectEndpoints({
         runDb(async () => {
           const stored = await importMediaBatch(picked, journeyId);
           try {
-            const rows = await db.transaction(async tx => {
+            const rows = await db.transaction(async (tx) => {
               const [{ last }] = await tx
                 .select({ last: max(media.sortOrder) })
                 .from(media)
@@ -184,7 +209,7 @@ export const stopsApi = baseApi.injectEndpoints({
           }
         }),
       invalidatesTags: (_r, _e, { stopId, journeyId }) => [
-        { type: 'Media', id: `stop-${stopId}` },
+        { type: TAGS.Media, id: `stop-${stopId}` },
         ...stopChangeTags(journeyId),
       ],
     }),
@@ -202,7 +227,7 @@ export const stopsApi = baseApi.injectEndpoints({
           return { removed: removed.length };
         }),
       invalidatesTags: (_r, _e, { stopId, journeyId }) => [
-        { type: 'Media', id: `stop-${stopId}` },
+        { type: TAGS.Media, id: `stop-${stopId}` },
         ...stopChangeTags(journeyId),
       ],
     }),
@@ -220,8 +245,8 @@ export const stopsApi = baseApi.injectEndpoints({
           return { id };
         }),
       invalidatesTags: (_r, _e, { id, journeyId }) => [
-        { type: 'Stop', id },
-        { type: 'Media', id: `stop-${id}` },
+        { type: TAGS.Stop, id },
+        { type: TAGS.Media, id: `stop-${id}` },
         ...stopChangeTags(journeyId),
       ],
     }),
@@ -230,14 +255,14 @@ export const stopsApi = baseApi.injectEndpoints({
     reorderStops: build.mutation<{ count: number }, ReorderStopsInput>({
       queryFn: ({ orderedIds }) =>
         runDb(async () => {
-          await db.transaction(async tx => {
+          await db.transaction(async (tx) => {
             for (const [index, id] of orderedIds.entries()) {
               await tx.update(stops).set({ orderIndex: index }).where(eq(stops.id, id));
             }
           });
           return { count: orderedIds.length };
         }),
-      invalidatesTags: (_r, _e, { journeyId }) => [{ type: 'Journey', id: journeyId }],
+      invalidatesTags: (_r, _e, { journeyId }) => [{ type: TAGS.Journey, id: journeyId }],
     }),
   }),
 });
@@ -249,8 +274,8 @@ stopsApi.enhanceEndpoints({
     reorderStops: {
       async onQueryStarted({ journeyId, orderedIds }, { dispatch, queryFulfilled }) {
         const patch = dispatch(
-          stopsApi.util.updateQueryData('getStopsByJourney', journeyId, draft => {
-            const byId = new Map(draft.map(s => [s.id, s]));
+          stopsApi.util.updateQueryData('getStopsByJourney', journeyId, (draft) => {
+            const byId = new Map(draft.map((s) => [s.id, s]));
             const next = orderedIds
               .map((id, index) => {
                 const stop = byId.get(id);

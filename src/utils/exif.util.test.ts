@@ -1,4 +1,4 @@
-import { extractGps, extractTakenAt, parseDms, parseExifDate } from './exif';
+import { extractGps, extractTakenAt, parseDms, parseExifDate } from './exif.util';
 
 describe('parseDms', () => {
   it('converts Android rational DMS to decimal degrees', () => {

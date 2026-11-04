@@ -10,25 +10,20 @@ import {
   REGISTER,
   REHYDRATE,
 } from 'redux-persist';
-import { setUnauthorizedHandler } from '@/api/client/axiosClient';
-import { queryClient } from '@/api/client/queryClient';
-import { authReducer, sessionExpired } from '@/store/slices/authSlice';
-import { baseApi } from '@/store/baseApi';
-import { exampleReducer } from '@/store/slices/exampleSlice';
+import { baseApi } from '@/api/baseApi';
+import { settingsReducer } from '@/store/slices/settingsSlice';
 
 const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
-  auth: authReducer,
-  example: exampleReducer, // EXAMPLE: delete or replace.
+  settings: settingsReducer,
 });
 
 const persistedReducer = persistReducer(
   {
     key: 'root',
     storage: createAsyncStorage('atlaslight'),
-    // Only list non-sensitive UI slices here. `auth` is never persisted: the token lives in the
-    // Keychain (src/auth/token.store.ts), and the session status is rebuilt from it at startup.
-    whitelist: ['example'],
+    // Only UI/settings slices belong here. Database data (baseApi) is never persisted.
+    whitelist: ['settings'],
   },
   rootReducer,
 );
@@ -43,11 +38,6 @@ export const store = configureStore({
 });
 
 export const persistor = persistStore(store);
-
-setUnauthorizedHandler(() => {
-  queryClient.clear();
-  store.dispatch(sessionExpired());
-});
 
 export type RootState = ReturnType<typeof rootReducer>;
 export type AppDispatch = typeof store.dispatch;

@@ -27,4 +27,5 @@ export const timings = {
 export const PRESS_SCALE = 0.97;
 
 /** Route replay speed: ~1.5s per 1,000 km, clamped so short trips still read and long ones don't drag. */
-export const routeReplayDuration = (km: number) => Math.min(6000, Math.max(1200, (km / 1000) * 1500));
+export const routeReplayDuration = (km: number): number =>
+  Math.min(6000, Math.max(1200, (km / 1000) * 1500));

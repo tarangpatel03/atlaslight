@@ -2,8 +2,9 @@ import { count, desc, eq, getTableColumns, max, min } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { type Journey, type NewJourney, journeys, media, stops } from '@/db/schema';
-import { deleteJourneyFolder } from '@/features/media/services/mediaStorage';
-import { baseApi, runDb } from '@/store/baseApi';
+import { deleteJourneyFolder } from '@/services/mediaStorage.service';
+import { baseApi, runDb } from '@/api/baseApi';
+import { TAGS } from '@/api/tags';
 
 export type JourneyListItem = Journey & {
   stopCount: number;
@@ -41,8 +42,8 @@ export const journeysApi = baseApi.injectEndpoints({
           return rows;
         }),
       providesTags: result => [
-        { type: 'Journey', id: 'LIST' },
-        ...(result ?? []).map(j => ({ type: 'Journey' as const, id: j.id })),
+        { type: TAGS.Journey, id: 'LIST' },
+        ...(result ?? []).map(j => ({ type: TAGS.Journey, id: j.id })),
       ],
     }),
 
@@ -63,7 +64,7 @@ export const journeysApi = baseApi.injectEndpoints({
           if (!row) throw new Error('Journey not found');
           return row;
         }),
-      providesTags: (_r, _e, id) => [{ type: 'Journey', id }],
+      providesTags: (_r, _e, id) => [{ type: TAGS.Journey, id }],
     }),
 
     createJourney: build.mutation<Journey, CreateJourneyInput>({
@@ -72,7 +73,7 @@ export const journeysApi = baseApi.injectEndpoints({
           const [row] = await db.insert(journeys).values(input).returning();
           return row;
         }),
-      invalidatesTags: [{ type: 'Journey', id: 'LIST' }, 'Stats'],
+      invalidatesTags: [{ type: TAGS.Journey, id: 'LIST' }, TAGS.Stats],
     }),
 
     updateJourney: build.mutation<Journey, UpdateJourneyInput>({
@@ -83,8 +84,8 @@ export const journeysApi = baseApi.injectEndpoints({
           return row;
         }),
       invalidatesTags: (_r, _e, { id }) => [
-        { type: 'Journey', id },
-        { type: 'Journey', id: 'LIST' },
+        { type: TAGS.Journey, id },
+        { type: TAGS.Journey, id: 'LIST' },
       ],
     }),
 
@@ -97,11 +98,11 @@ export const journeysApi = baseApi.injectEndpoints({
           return { id };
         }),
       invalidatesTags: (_r, _e, id) => [
-        { type: 'Journey', id },
-        { type: 'Journey', id: 'LIST' },
-        'Stop',
-        'Media',
-        'Stats',
+        { type: TAGS.Journey, id },
+        { type: TAGS.Journey, id: 'LIST' },
+        TAGS.Stop,
+        TAGS.Media,
+        TAGS.Stats,
       ],
     }),
   }),
