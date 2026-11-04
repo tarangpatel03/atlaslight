@@ -1,0 +1,37 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/Fraunces-Medium.ttf",
+      "sha1": "97ced9402b132eb45d453b9f031f1e7a45ecd4f1"
+    },
+    {
+      "path": "src/assets/fonts/Fraunces-SemiBold.ttf",
+      "sha1": "1eaf25e50f2830e42428f0912a57bf8718872bc0"
+    },
+    {
+      "path": "src/assets/fonts/Manrope-Bold.ttf",
+      "sha1": "a2ce9eba3156407cc1194946ee9527f89cb9ffb2"
+    },
+    {
+      "path": "src/assets/fonts/Manrope-Medium.ttf",
+      "sha1": "ff241f166dd8c6dbcc7b7c8494037fb8358f2584"
+    },
+    {
+      "path": "src/assets/fonts/Manrope-Regular.ttf",
+      "sha1": "b51db9724637aa7892d84926399697ca3439fc2a"
+    },
+    {
+      "path": "src/assets/fonts/Manrope-SemiBold.ttf",
+      "sha1": "842b52cae7d844c45f98d354cc31ffec329973d4"
+    },
+    {
+      "path": "src/assets/fonts/SpaceGrotesk-Medium.ttf",
+      "sha1": "7d2fe2b9e0c9e76ab5bebf7cd766acd1d5c4dcbb"
+    },
+    {
+      "path": "src/assets/fonts/SpaceGrotesk-SemiBold.ttf",
+      "sha1": "e99da7dd55ac9ed7675a533c5a98cd7797613a67"
+    }
+  ]
+}
