@@ -4,22 +4,22 @@ An offline-first travel journal. Record journeys, attach memories (photos, video
 
 ## Stack
 
-| Part     | Choice                                                                             |
-| -------- | ---------------------------------------------------------------------------------- |
-| App      | React Native 0.88.1 (new architecture, Hermes), React 19.3.0                       |
-| Language | TypeScript 5.9.3, strict                                                           |
-| Data     | SQLite (op-sqlite) + Drizzle ORM, read and written through RTK Query (`queryFn`)   |
-| State    | Redux Toolkit 2 + react-redux 9 + redux-persist 6 (UI and settings state)          |
-| Navigate | React Navigation 7 (native stack + bottom tabs)                                    |
-| Storage  | AsyncStorage 3 (persisted settings), app documents directory (media files)         |
+| Part     | Choice                                                                                                          |
+| -------- | --------------------------------------------------------------------------------------------------------------- |
+| App      | React Native 0.88.1 (new architecture, Hermes), React 19.3.0                                                    |
+| Language | TypeScript 5.9.3, strict                                                                                        |
+| Data     | SQLite (op-sqlite) + Drizzle ORM, read and written through RTK Query (`queryFn`)                                |
+| State    | Redux Toolkit 2 + react-redux 9 + redux-persist 6 (UI and settings state)                                       |
+| Navigate | React Navigation 7 (native stack + bottom tabs)                                                                 |
+| Storage  | AsyncStorage 3 (persisted settings), app documents directory (media files)                                      |
 | Media    | react-native-image-crop-picker, camera-roll (photo locations), react-native-fs, create-thumbnail, image-resizer |
-| UI       | reanimated 4, gesture-handler, gorhom bottom-sheet, svg, lucide icons              |
-| Lists    | FlashList 2, react-native-reorderable-list (timeline drag reorder)                 |
-| Forms    | react-hook-form + zod, datetimepicker, date-fns                                    |
-| Viewing  | react-native-video 6, fast-image (photo and video display), @turf/distance         |
-| Tests    | Jest (pure logic only)                                                             |
-| Tooling  | ESLint 9 (flat config) + Prettier 3, `@/` absolute imports (babel module-resolver) |
-| Package  | Yarn classic (1.x), Node >= 22.11                                                  |
+| UI       | reanimated 4, gesture-handler, gorhom bottom-sheet, svg, lucide icons                                           |
+| Lists    | FlashList 2, react-native-reorderable-list (timeline drag reorder)                                              |
+| Forms    | react-hook-form + zod, datetimepicker, date-fns                                                                 |
+| Viewing  | react-native-video 6, fast-image (photo and video display), @turf/distance                                      |
+| Tests    | Jest (pure logic only)                                                                                          |
+| Tooling  | ESLint 9 (flat config) + Prettier 3, `@/` absolute imports (babel module-resolver)                              |
+| Package  | Yarn classic (1.x), Node >= 22.11                                                                               |
 
 ## Setup from zero (Windows 11, Android physical phone)
 
@@ -31,7 +31,18 @@ An offline-first travel journal. Record journeys, attach memories (photos, video
 
 The Settings tab has **Load demo journeys**: it adds 7 sample journeys with photos (run it again and nothing is duplicated). In the memory form, **Found in your photos** asks for photo access (and photo locations) the first time it is used; the system photo picker hides GPS, so places come from that card or from place search. Dev builds add an **Open UI kit** button to the Settings tab (`src/screens/KitScreen`), a gallery of the UI components; release builds do not include it.
 
+The Map tab uses MapLibre with OpenFreeMap vector tiles (no API key). Tiles need a network connection the first time; the attribution button on the map credits OpenFreeMap and OpenStreetMap.
+
 After adding a native module, a font or a demo photo, rebuild with `yarn android`; a Metro reload is not enough. Fonts live in `src/assets/fonts/` and the demo photos in `src/assets/demo/photos/` (lowercase `demo_<name>.jpg`, one flat resource namespace); both are linked with `npx react-native-asset`. iOS (Mac only): `bundle install`, `cd ios && bundle exec pod install`, then `yarn ios`. The iOS project has not been built.
+
+## Map data
+
+Visited countries and Indian states/UTs are worked out on the device from two bundled files in `src/assets/geo/` (point-in-polygon, no network), so they work offline from the first launch:
+
+- `countries.json`: [Natural Earth](https://www.naturalearthdata.com/) 1:50m admin-0 countries (public domain), reduced to `{ iso2, name }`. Natural Earth marks France and Norway `-99`; `ISO_A2_EH` is used for those, and Somaliland, N. Cyprus and Siachen Glacier are mapped to SO, CY and IN by hand.
+- `indiaStates.json`: Natural Earth 1:10m admin-1, India only (36 states and union territories, including Ladakh), reduced to `{ name }`. Natural Earth draws borders in its default de facto view.
+
+Both are simplified to keep them small (about 470 KB and 85 KB). To regenerate (for example after a new Natural Earth release): download `ne_50m_admin_0_countries.geojson` and `ne_10m_admin_1_states_provinces.geojson` from the [natural-earth-vector](https://github.com/nvkelso/natural-earth-vector) repo, keep only the properties above (India = features with `iso_a2 = IN`), then run `npx mapshaper <in>.geojson -simplify 25% keep-shapes -o countries.json format=geojson precision=0.001` (15% for the India file). Nothing is downloaded by the app.
 
 ## Database
 

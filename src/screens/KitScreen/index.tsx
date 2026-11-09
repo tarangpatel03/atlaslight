@@ -1,11 +1,12 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 import { AppText, ICONS, Icon, type IconName } from '@/components/brand';
 import { AppButton, Fab, IconButton, type ButtonVariant } from '@/components/buttons';
 import { landscapePhoto, portraitPhoto } from '@/assets/demo';
 import { JourneyCard, MemoryCard } from '@/components/cards';
 import { Chip, Switch, TextField } from '@/components/inputs';
 import { Screen } from '@/components/layout';
+import { MapPin } from '@/components/map';
 import {
   AppBottomSheet,
   AuroraRing,
@@ -22,6 +23,9 @@ import { styles } from './style';
 import { KitSection } from './subcomponents';
 
 const noop = (): void => undefined;
+
+// MapPin takes a file URI; the demo photo stands in for a memory thumbnail.
+const landscapeUri = Image.resolveAssetSource(landscapePhoto)?.uri;
 
 // Local-time noon, so the demo dates read the same in any timezone.
 const day = (year: number, monthIndex: number, date: number): number =>
@@ -217,6 +221,17 @@ export const KitScreen = (): ReactNode => {
               <IconButton icon="search" onPress={noop} />
               <IconButton icon="route" onPress={noop} disabled />
               <Fab onPress={noop} />
+            </View>
+          </KitSection>
+
+          <KitSection title="Map pins">
+            <View style={[styles.row, styles.mapBlock]}>
+              <MapPin variant="dot" />
+              <MapPin variant="cluster" count={12} />
+              <MapPin variant="photo" uri={landscapeUri} />
+              <MapPin variant="photo" uri={landscapeUri} selected />
+              <MapPin variant="wish" />
+              <MapPin variant="live" />
             </View>
           </KitSection>
 

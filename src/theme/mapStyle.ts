@@ -3,15 +3,14 @@ import { colors } from './colors';
 /**
  * Atlaslight dark map style for @maplibre/maplibre-react-native.
  * Tiles: OpenFreeMap (free, no API key), OpenMapTiles schema.
- * Pass it as `mapStyle={atlaslightMapStyle}` on <MapView>.
+ * Pass it as `mapStyle` on <Map> (wrapped by AtlasMap).
  *
  * Kept deliberately quiet: water darker than land, thin borders, muted labels,
  * roads only at street zoom — so amber pins and aurora routes carry the colour.
  * Visited-region fills, routes and pins are NOT here: the map screen adds them
  * as its own sources/layers on top.
  */
-// VERIFY on first run: open https://tiles.openfreemap.org/styles/dark in a browser and copy its
-// `sources.openmaptiles.url` and `glyphs` values here if they differ from these.
+// Same source and glyph URLs as https://tiles.openfreemap.org/styles/dark (checked in 4.2).
 const OPENFREEMAP_TILES = 'https://tiles.openfreemap.org/planet';
 const OPENFREEMAP_GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
 
@@ -40,7 +39,10 @@ export const atlaslightMapStyle = {
       source: 'openmaptiles',
       'source-layer': 'waterway',
       minzoom: 8,
-      paint: { 'line-color': colors.mapWater, 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 14, 2] },
+      paint: {
+        'line-color': colors.mapWater,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 14, 2],
+      },
     },
     {
       id: 'roads',
@@ -48,7 +50,11 @@ export const atlaslightMapStyle = {
       source: 'openmaptiles',
       'source-layer': 'transportation',
       minzoom: 11,
-      filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor']]],
+      filter: [
+        'in',
+        ['get', 'class'],
+        ['literal', ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'minor']],
+      ],
       layout: { 'line-cap': 'round', 'line-join': 'round' },
       paint: {
         'line-color': colors.mapRoad,
@@ -70,7 +76,10 @@ export const atlaslightMapStyle = {
       source: 'openmaptiles',
       'source-layer': 'boundary',
       filter: ['all', ['==', ['get', 'admin_level'], 2], ['==', ['get', 'maritime'], 0]],
-      paint: { 'line-color': colors.mapBorder, 'line-width': ['interpolate', ['linear'], ['zoom'], 1, 0.75, 8, 1.5] },
+      paint: {
+        'line-color': colors.mapBorder,
+        'line-width': ['interpolate', ['linear'], ['zoom'], 1, 0.75, 8, 1.5],
+      },
     },
     {
       id: 'labels-country',
@@ -86,7 +95,11 @@ export const atlaslightMapStyle = {
         'text-transform': 'uppercase',
         'text-letter-spacing': 0.08,
       },
-      paint: { 'text-color': colors.mapLabel, 'text-halo-color': colors.mapWater, 'text-halo-width': 1 },
+      paint: {
+        'text-color': colors.mapLabel,
+        'text-halo-color': colors.mapWater,
+        'text-halo-width': 1,
+      },
     },
     {
       id: 'labels-city',
@@ -100,7 +113,11 @@ export const atlaslightMapStyle = {
         'text-font': ['Noto Sans Regular'],
         'text-size': ['interpolate', ['linear'], ['zoom'], 5, 10, 12, 14],
       },
-      paint: { 'text-color': colors.mapLabel, 'text-halo-color': colors.mapWater, 'text-halo-width': 1 },
+      paint: {
+        'text-color': colors.mapLabel,
+        'text-halo-color': colors.mapWater,
+        'text-halo-width': 1,
+      },
     },
   ],
 } as const;
@@ -115,5 +132,13 @@ export const visitedRegionPaint = {
 export const routeLinePaint = {
   'line-width': 3,
   'line-cap': 'round',
-  'line-gradient': ['interpolate', ['linear'], ['line-progress'], 0, colors.auroraTeal, 1, colors.auroraViolet],
+  'line-gradient': [
+    'interpolate',
+    ['linear'],
+    ['line-progress'],
+    0,
+    colors.auroraTeal,
+    1,
+    colors.auroraViolet,
+  ],
 } as const;

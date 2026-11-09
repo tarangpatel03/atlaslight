@@ -26,6 +26,7 @@ export type Theme = typeof theme;
 
 export * from './colors';
 export * from './layout';
+export * from './mapPins';
 export * from './mapStyle';
 export * from './motion';
 export * from './typography';
