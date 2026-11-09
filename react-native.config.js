@@ -1,9 +1,9 @@
 // Links the Atlaslight fonts into the Android (and iOS) projects.
-// After adding or changing files in src/assets/fonts, run: npx react-native-asset
+// Also links the demo photos (src/assets/demo/photos). After adding or changing files in either folder, run: npx react-native-asset
 module.exports = {
   project: {
     ios: {},
     android: {},
   },
-  assets: ['./src/assets/fonts'],
+  assets: ['./src/assets/fonts', './src/assets/demo/photos'],
 };

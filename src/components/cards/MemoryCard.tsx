@@ -22,6 +22,8 @@ interface MemoryCardProps {
   /** Last row of the timeline: no connector line below the dot. */
   isLast?: boolean;
   onPress: () => void;
+  /** Long press, e.g. to drag the row in a reorderable timeline. */
+  onLongPress?: () => void;
 }
 
 const THUMB = 64;
@@ -38,6 +40,7 @@ export const MemoryCard = ({
   mood,
   isLast = false,
   onPress,
+  onLongPress,
 }: MemoryCardProps): ReactNode => {
   const photos = formatCount(mediaCount, 'photo', 'photos');
 
@@ -52,7 +55,7 @@ export const MemoryCard = ({
         {isLast ? null : <View style={styles.line} />}
       </View>
       <View style={[styles.body, !isLast && styles.bodySpacing]}>
-        <Card onPress={onPress} style={styles.card}>
+        <Card onPress={onPress} onLongPress={onLongPress} style={styles.card}>
           <View style={styles.cardRow}>
             <Cover source={thumb} style={styles.thumb} />
             <View style={styles.text}>
@@ -78,7 +81,11 @@ export const MemoryCard = ({
                   {visitedLabel} · {photos}
                 </AppText>
               </View>
-              {mood ? <Chip label={mood} /> : null}
+              {mood ? (
+                <View style={styles.chip}>
+                  <Chip label={mood} />
+                </View>
+              ) : null}
             </View>
           </View>
         </Card>
@@ -106,7 +113,9 @@ const styles = StyleSheet.create({
   card: { padding: space[3] },
   cardRow: { flexDirection: 'row', gap: space[3], alignItems: 'flex-start' },
   thumb: { width: THUMB, height: THUMB, borderRadius: radius.sm },
-  text: { flex: 1, gap: space[1], alignItems: 'flex-start' },
+  // Texts fill the column: a shrink-wrapped title can lose its last word to a rounding difference on Android.
+  text: { flex: 1, gap: space[1] },
+  chip: { alignSelf: 'flex-start' },
   meta: { flexDirection: 'row', alignItems: 'center', gap: space[1] },
   shrink: { flexShrink: 1 },
 });

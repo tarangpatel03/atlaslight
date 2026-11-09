@@ -11,5 +11,9 @@ export type MainTabParamList = {
 /** Routes of the root stack. */
 export type RootStackParamList = {
   [SCREENS.Main]: undefined;
+  [SCREENS.JourneyDetail]: { journeyId: string };
+  [SCREENS.JourneyForm]: { journeyId?: string } | undefined;
+  [SCREENS.MemoryDetail]: { stopId: string };
+  [SCREENS.MemoryForm]: { journeyId?: string; stopId?: string } | undefined;
   [SCREENS.Kit]: undefined;
 };

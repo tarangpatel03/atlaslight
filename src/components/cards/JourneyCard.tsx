@@ -13,6 +13,12 @@ interface JourneyCardProps {
   /** Ready-made text, e.g. `12–15 Mar 2026` (see `formatDateRange`). */
   dateRange: string;
   memoryCount: number;
+  /** Photos in the journey; left out of the meta line when not given. */
+  photoCount?: number;
+  /** Ready-made text, e.g. `1,240 km` (see `formatDistance`); left out when not given. */
+  distance?: string;
+  /** State or province, shown after the dates. */
+  region?: string | null;
   cover?: ImageSourcePropType;
   /** Journey without an end date: shows the live "Ongoing" chip. */
   ongoing?: boolean;
@@ -24,13 +30,16 @@ interface JourneyCardProps {
   onPress: () => void;
 }
 
-const THUMB = 64;
+const THUMB = 88;
 
 /** Journey in a list or grid: cover, title, dates and memory count. */
 export const JourneyCard = ({
   title,
   dateRange,
   memoryCount,
+  photoCount,
+  distance,
+  region,
   cover,
   ongoing = false,
   favorite = false,
@@ -38,7 +47,14 @@ export const JourneyCard = ({
   layout,
   onPress,
 }: JourneyCardProps): ReactNode => {
-  const count = formatCount(memoryCount, 'memory', 'memories');
+  const dates = region ? `${dateRange} · ${region}` : dateRange;
+  const meta = [
+    formatCount(memoryCount, 'memory', 'memories'),
+    photoCount === undefined ? null : formatCount(photoCount, 'photo', 'photos'),
+    distance ?? null,
+  ]
+    .filter((part): part is string => part !== null)
+    .join(' · ');
   const frame = [layout === 'hero' ? styles.heroCard : styles.rowCard, selected && styles.selected];
 
   if (layout === 'hero') {
@@ -50,6 +66,12 @@ export const JourneyCard = ({
             {title}
           </AppText>
         </View>
+        {ongoing ? (
+          // On the photo like the design; the scrim behind keeps the label readable on any picture.
+          <View style={styles.heroBadge}>
+            <Chip label="Ongoing" variant="live" />
+          </View>
+        ) : null}
         {favorite ? (
           <View style={styles.heroHeart}>
             <Icon name="heart" color={colors.amber} />
@@ -58,13 +80,12 @@ export const JourneyCard = ({
         <View style={styles.heroMeta}>
           <View style={styles.metaText}>
             <AppText variant="caption" color={colors.inkMuted}>
-              {dateRange}
+              {dates}
             </AppText>
-            <AppText variant="caption" color={colors.inkMuted}>
-              {count}
+            <AppText variant="coord" color={colors.inkSubtle}>
+              {meta}
             </AppText>
           </View>
-          {ongoing ? <Chip label="Ongoing" variant="live" /> : null}
         </View>
       </Card>
     );
@@ -79,7 +100,10 @@ export const JourneyCard = ({
             {title}
           </AppText>
           <AppText variant="caption" color={colors.inkMuted}>
-            {dateRange} · {count}
+            {dates}
+          </AppText>
+          <AppText variant="coord" color={colors.inkSubtle}>
+            {meta}
           </AppText>
           {ongoing ? <Chip label="Ongoing" variant="live" /> : null}
         </View>
@@ -104,6 +128,13 @@ const styles = StyleSheet.create({
     aspectRatio: 16 / 9,
     justifyContent: 'flex-end',
     padding: space[4],
+  },
+  heroBadge: {
+    position: 'absolute',
+    top: space[3],
+    left: space[3],
+    borderRadius: radius.pill,
+    backgroundColor: colors.scrim,
   },
   heroHeart: {
     position: 'absolute',

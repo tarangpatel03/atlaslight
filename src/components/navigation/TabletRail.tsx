@@ -4,15 +4,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fab } from '@/components/buttons';
 import { colors } from '@/theme/colors';
 import { sizes, space } from '@/theme/layout';
-import { showToast } from '@/utils/toast.util';
 import { TabItem, type TabEntry } from './TabItem';
 
 interface TabletRailProps {
   entries: TabEntry[];
+  /** The + button: what it adds depends on the tab, so the tab bar decides. */
+  onAdd: () => void;
 }
 
 /** 88 dp navigation rail for medium and expanded windows: add button on top, Settings at the bottom. */
-export const TabletRail = ({ entries }: TabletRailProps): ReactNode => {
+export const TabletRail = ({ entries, onAdd }: TabletRailProps): ReactNode => {
   const insets = useSafeAreaInsets();
   // The last tab (Settings) is pinned to the bottom; the others sit under the add button.
   const main = entries.slice(0, -1);
@@ -29,10 +30,7 @@ export const TabletRail = ({ entries }: TabletRailProps): ReactNode => {
         },
       ]}
     >
-      <Fab
-        // The Add memory screen arrives in Phase 3.
-        onPress={() => showToast.info('Adding memories arrives soon')}
-      />
+      <Fab onPress={onAdd} />
       <View style={styles.group}>
         {main.map((entry) => (
           <TabItem key={entry.name} {...entry} />

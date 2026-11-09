@@ -9,17 +9,19 @@ interface CardProps {
   children: ReactNode;
   /** Makes the card a button. */
   onPress?: () => void;
+  /** Long press, e.g. to start dragging the card in a reorderable list. */
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 /** Flat `surface` card: elevation comes from the lighter ground, not from a shadow. */
-export const Card = ({ children, onPress, style }: CardProps): ReactNode => {
+export const Card = ({ children, onPress, onLongPress, style }: CardProps): ReactNode => {
   const { style: scaleStyle, handlers } = usePressScale();
 
   if (!onPress) return <View style={[styles.card, style]}>{children}</View>;
 
   return (
-    <Pressable onPress={onPress} {...handlers}>
+    <Pressable onPress={onPress} onLongPress={onLongPress} {...handlers}>
       {({ pressed }) => (
         <Animated.View style={[styles.card, pressed && styles.pressed, style, scaleStyle]}>
           {children}

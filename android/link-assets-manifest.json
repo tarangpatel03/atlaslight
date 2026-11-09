@@ -2,6 +2,14 @@
   "migIndex": 1,
   "data": [
     {
+      "path": "src/assets/demo/photos/demo_landscape.jpg",
+      "sha1": "a9a0107111dfdd9a08861d3962cbde25eb8ce419"
+    },
+    {
+      "path": "src/assets/demo/photos/demo_portrait.jpg",
+      "sha1": "f2808f9280774e3742e3738ffe0bddeb667271af"
+    },
+    {
       "path": "src/assets/fonts/Fraunces-Medium.ttf",
       "sha1": "97ced9402b132eb45d453b9f031f1e7a45ecd4f1"
     },

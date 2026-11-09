@@ -1,11 +1,11 @@
 import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { createdAt, id, updatedAt } from '../columns';
+import { MOODS } from '../moods';
 import { journeys } from './journeys';
 import { places } from './places';
 
-export const MOODS = ['happy', 'calm', 'adventurous', 'romantic', 'nostalgic', 'tired'] as const;
-export type Mood = (typeof MOODS)[number];
+export { MOODS, type Mood } from '../moods';
 
 // A stop is a single memory at one location within a journey.
 export const stops = sqliteTable(

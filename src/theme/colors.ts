@@ -54,3 +54,14 @@ export type ColorToken = keyof typeof colors;
 
 /** Aurora gradient stops for react-native-svg / linear-gradient: always teal → violet. */
 export const auroraGradient = [colors.auroraTeal, colors.auroraViolet] as const;
+
+/** Journey accents, assigned in rotation on create. Existing tokens only; stored as hex so a backup keeps its look. */
+export const JOURNEY_COLORS = [
+  colors.amber,
+  colors.auroraTeal,
+  colors.violetInk,
+  colors.danger,
+  colors.inkMuted,
+] as const;
+
+export type JourneyColor = (typeof JOURNEY_COLORS)[number];

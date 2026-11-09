@@ -1,4 +1,11 @@
-import { formatCount, formatDate, formatDateRange } from './format.util';
+import {
+  formatCount,
+  formatDate,
+  formatDateRange,
+  formatRelativeDay,
+  formatShortDateTime,
+  formatTime,
+} from './format.util';
 
 // Built from local-time parts so the tests pass in any timezone.
 const day = (year: number, monthIndex: number, date: number): number =>
@@ -40,5 +47,46 @@ describe('formatCount', () => {
   it('uses the plural otherwise', () => {
     expect(formatCount(6, 'memory', 'memories')).toBe('6 memories');
     expect(formatCount(0, 'memory', 'memories')).toBe('0 memories');
+  });
+});
+
+describe('formatRelativeDay', () => {
+  const now = day(2026, 10, 9);
+
+  it('says Today and Yesterday', () => {
+    expect(formatRelativeDay(day(2026, 10, 9), now)).toBe('Today');
+    expect(formatRelativeDay(day(2026, 10, 8), now)).toBe('Yesterday');
+  });
+
+  it('counts days under a month', () => {
+    expect(formatRelativeDay(day(2026, 10, 2), now)).toBe('7 days ago');
+  });
+
+  it('counts months under a year', () => {
+    expect(formatRelativeDay(day(2026, 9, 1), now)).toBe('1 month ago');
+    expect(formatRelativeDay(day(2026, 3, 1), now)).toBe('7 months ago');
+  });
+
+  it('counts years', () => {
+    expect(formatRelativeDay(day(2025, 4, 1), now)).toBe('1 year ago');
+    expect(formatRelativeDay(day(2024, 10, 9), now)).toBe('2 years ago');
+  });
+});
+
+describe('formatTime', () => {
+  it('uses a 12-hour clock with am and pm', () => {
+    expect(formatTime(new Date(2026, 5, 6, 23, 30).getTime())).toBe('11:30 pm');
+    expect(formatTime(new Date(2026, 5, 6, 9, 5).getTime())).toBe('9:05 am');
+  });
+
+  it('shows midnight and noon as 12', () => {
+    expect(formatTime(new Date(2026, 5, 6, 0, 0).getTime())).toBe('12:00 am');
+    expect(formatTime(new Date(2026, 5, 6, 12, 0).getTime())).toBe('12:00 pm');
+  });
+});
+
+describe('formatShortDateTime', () => {
+  it('joins day, month and time without the year', () => {
+    expect(formatShortDateTime(new Date(2026, 5, 6, 23, 30).getTime())).toBe('6 Jun · 11:30 pm');
   });
 });

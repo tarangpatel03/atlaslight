@@ -18,10 +18,17 @@ interface CoverProps {
   style: StyleProp<ViewStyle>;
   /** Darkens the bottom of a photo so text on it stays readable. */
   scrim?: boolean;
+  /** Colour the scrim fades into; the ground the cover sits on (default `bg`). */
+  scrimColor?: string;
 }
 
 /** Photo (or the no-cover block) used by JourneyCard and MemoryCard. Photos are never filtered. */
-export const Cover = ({ source, style, scrim = false }: CoverProps): ReactNode => (
+export const Cover = ({
+  source,
+  style,
+  scrim = false,
+  scrimColor = colors.bg,
+}: CoverProps): ReactNode => (
   <View style={[styles.base, style]}>
     {source ? (
       <Image source={source} style={styles.image} resizeMode="cover" />
@@ -33,8 +40,8 @@ export const Cover = ({ source, style, scrim = false }: CoverProps): ReactNode =
         <Svg width="100%" height="100%" preserveAspectRatio="none">
           <Defs>
             <LinearGradient id="coverScrim" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={colors.bg} stopOpacity={0} />
-              <Stop offset="1" stopColor={colors.bg} stopOpacity={0.88} />
+              <Stop offset="0" stopColor={scrimColor} stopOpacity={0} />
+              <Stop offset="1" stopColor={scrimColor} stopOpacity={0.88} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="100%" height="100%" fill="url(#coverScrim)" />

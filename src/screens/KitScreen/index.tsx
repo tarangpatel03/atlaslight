@@ -314,7 +314,7 @@ export const KitScreen = (): ReactNode => {
         </ScrollView>
       </Screen>
 
-      {/* Siblings of Screen so the sheets span the full width, not the 640 dp content column. */}
+      {/* Siblings of Screen so the sheets span the full width, not the screen margins. */}
       <AppBottomSheet
         ref={mapSheet}
         snapPoints={['36%', '60%']}

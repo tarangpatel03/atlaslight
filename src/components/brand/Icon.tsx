@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   Calendar,
+  Camera,
   Check,
   CircleAlert,
   ChevronLeft,
@@ -9,10 +10,12 @@ import {
   Image,
   Map,
   MapPin,
+  Pencil,
   Plus,
   Route,
   Search,
   Settings,
+  Video,
   X,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -36,6 +39,9 @@ export const ICONS = {
   route: Route,
   alert: CircleAlert,
   heart: Heart,
+  edit: Pencil,
+  camera: Camera,
+  video: Video,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

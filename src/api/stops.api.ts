@@ -20,6 +20,7 @@ import { TAGS } from '@/api/tags';
 export type StopListItem = Stop & {
   mediaCount: number;
   coverThumbnailPath: string | null;
+  placeName: string | null;
 };
 
 export type StopDetail = Stop & {
@@ -61,7 +62,7 @@ const stopChangeTags = (journeyId: string) => [
   TAGS.Stats,
 ];
 
-const toMediaRows = (
+export const toMediaRows = (
   stopId: string,
   stored: Awaited<ReturnType<typeof importMediaBatch>>,
   startOrder = 0,
@@ -97,6 +98,8 @@ export const stopsApi = baseApi.injectEndpoints({
                 where ${media.stopId} = ${stops.id}
                 order by ${media.sortOrder} limit 1
               )`,
+              // Plain SQL: with a single-table select Drizzle drops the table prefix from interpolated columns.
+              placeName: sql<string | null>`(select places.name from places where places.id = stops.place_id)`,
             })
             .from(stops)
             .leftJoin(media, eq(media.stopId, stops.id))
@@ -262,7 +265,11 @@ export const stopsApi = baseApi.injectEndpoints({
           });
           return { count: orderedIds.length };
         }),
-      invalidatesTags: (_r, _e, { journeyId }) => [{ type: TAGS.Journey, id: journeyId }],
+      // The list shows each journey's distance and cover, which both depend on the order.
+      invalidatesTags: (_r, _e, { journeyId }) => [
+        { type: TAGS.Journey, id: journeyId },
+        { type: TAGS.Journey, id: 'LIST' },
+      ],
     }),
   }),
 });
