@@ -9,7 +9,7 @@ interface SettingsState {
 
 const initialState: SettingsState = { units: 'km' };
 
-/** Persisted user settings. Phase 6 adds the rest (haptics, map toggles, reduce motion). */
+/** Persisted user settings. Phase 6 adds the rest (map toggles). */
 const settingsSlice = createSlice({
   name: 'settings',
   initialState,

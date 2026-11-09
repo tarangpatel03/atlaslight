@@ -32,8 +32,9 @@ When docs, this file, rules, skills or comments disagree with the code (or with 
 
 ## Code changes
 
+- **Never add accessibility.** No `accessibility*` props, roles, labels, hints or state, no screen-reader text, no font-scale handling (`maxFontSizeMultiplier`), no Reduce Motion handling, no touch-target or accessibility checks, and no accessibility notes in docs or reports. The existing `allowFontScaling={false}` on `AppText` and `TextField` is an owner decision and stays.
 - File names: screens, components and navigators are PascalCase, and so are their folders (`screens/JourneysScreen/`, `components/buttons/AppButton.tsx`, `Navigation/RootNavigator.tsx`). Grouping folders (`components/buttons/`, `components/feedback/`) and everything else are camelCase with a role suffix (`.types.ts`, `.api.ts`, `.service.ts`, `.util.ts`). A file with no peers stays flat. Details in docs/CONVENTIONS.md.
-- Imports are absolute: `@/` points at `src/` (babel `module-resolver` + tsconfig `paths`). Barrel files (`index.ts` re-exports, e.g. `theme/index.ts`, `db/schema/index.ts`) are allowed, but import them only through `@/` paths, never through `./` or `../`.
+- Imports use only three forms: `./<name>`, `../<name>` and `@/` (points at `src/`; babel `module-resolver` + tsconfig `paths`). An `@/` path has at most two levels (`@/theme`, `@/theme/colors`, `@/components/buttons`), never more (`@/components/buttons/AppButton` is wrong). When a folder sits deeper, give it an `index.ts` barrel and import the folder. No `../../`.
 - React and React Native code (components, hooks, handlers, helpers) uses arrow functions (`export const Foo = (): ReactNode => {}`), not `function` declarations. ESLint enforces it. Error boundaries stay classes.
 - **Never use `useContext`.** Shared UI state lives in Redux (typed hooks `useAppDispatch` and `useAppSelector` from `@/store/hooks`). Data lives in SQLite and is read through RTK Query hooks. ESLint enforces it.
 - Never hardcode route names or cache tag names. Use the central constants and add new ones there first: screens in `src/Navigation/routes.ts`, RTK Query tags in `src/api/tags.ts`.

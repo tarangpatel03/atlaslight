@@ -17,7 +17,11 @@
 
 ## Imports
 
-Absolute, from `@/` (= `src/`): `import { colors } from '@/theme/colors'`. Set in `babel.config.js` (module-resolver) and `tsconfig.json` (`paths`); change both together. Barrel (`index.ts`) files are allowed (`theme/index.ts`, `db/schema/index.ts`), but import them only through `@/` paths, never through `./` or `../`. A relative `./` import is fine for a plain sibling file such as `./style`.
+Only three forms: `./<name>`, `../<name>` and `@/` (= `src/`, set in `babel.config.js` module-resolver and `tsconfig.json` `paths`; change both together).
+
+- An `@/` path has at most two levels: `@/theme`, `@/theme/colors`, `@/components/buttons`. Never deeper: `@/components/buttons/AppButton` is wrong.
+- A folder that sits deeper than that gets an `index.ts` barrel (`components/buttons/index.ts`, `store/slices/index.ts`), and you import the folder.
+- Relative imports go one step only: `./style`, `./slices`, `../columns`. No `../../`, and no `./a/b`.
 
 ## Cache tags
 

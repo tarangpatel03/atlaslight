@@ -9,7 +9,7 @@ interface AppTextProps extends TextProps {
   children: ReactNode;
 }
 
-/** Themed text. Honours the user's font scale; pass `maxFontSizeMultiplier` only on tight UI. */
+/** Themed text. Always drawn at 1x: the app ignores the system font scale (owner decision, see design brief). */
 export const AppText = ({
   variant = 'body',
   color = colors.ink,
@@ -17,7 +17,7 @@ export const AppText = ({
   children,
   ...rest
 }: AppTextProps): ReactNode => (
-  <Text {...rest} style={[typography[variant], { color }, style]}>
+  <Text {...rest} allowFontScaling={false} style={[typography[variant], { color }, style]}>
     {children}
   </Text>
 );

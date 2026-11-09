@@ -1,4 +1,4 @@
-import { open } from '@op-engineering/op-sqlite';
+import { open, type Scalar } from '@op-engineering/op-sqlite';
 import { drizzle } from 'drizzle-orm/op-sqlite';
 
 import * as schema from '@/db/schema';
@@ -7,7 +7,15 @@ const DB_NAME = 'journeys.db';
 
 export const sqlite = open({ name: DB_NAME });
 
-export const db = drizzle(sqlite, { schema });
+/**
+ * op-sqlite 19 returns `{ rawRows, ... }` from `executeRaw`, but drizzle-orm 0.45 expects the rows array.
+ * Without this, Drizzle's migration check and every select read nothing (migrations rerun on each launch).
+ * Remove once Drizzle supports op-sqlite 19.
+ */
+const executeRawAsync = async (query: string, params?: Scalar[]): Promise<Scalar[][]> =>
+  (await sqlite.executeRaw(query, params)).rawRows;
+
+export const db = drizzle({ ...sqlite, executeRawAsync }, { schema });
 
 export type Database = typeof db;
 

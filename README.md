@@ -10,10 +10,10 @@ An offline-first travel journal. Record journeys, attach memories (photos, video
 | Language | TypeScript 5.9.3, strict                                                           |
 | Data     | SQLite (op-sqlite) + Drizzle ORM, read and written through RTK Query (`queryFn`)   |
 | State    | Redux Toolkit 2 + react-redux 9 + redux-persist 6 (UI and settings state)          |
-| Navigate | React Navigation 7 (native stack)                                                  |
+| Navigate | React Navigation 7 (native stack + bottom tabs)                                    |
 | Storage  | AsyncStorage 3 (persisted settings), app documents directory (media files)         |
 | Media    | react-native-image-crop-picker, react-native-fs, create-thumbnail, image-resizer   |
-| UI       | react-native-reanimated 4, safe-area-context, react-native-toast-message           |
+| UI       | reanimated 4, gesture-handler, gorhom bottom-sheet, svg, lucide icons              |
 | Tests    | Jest (pure logic only)                                                             |
 | Tooling  | ESLint 9 (flat config) + Prettier 3, `@/` absolute imports (babel module-resolver) |
 | Package  | Yarn classic (1.x), Node >= 22.11                                                  |
@@ -25,6 +25,8 @@ An offline-first travel journal. Record journeys, attach memories (photos, video
 3. On the phone: enable Developer options, turn on USB debugging, connect over USB and accept the prompt. Check with `adb devices`.
 4. `yarn install`
 5. `yarn start` in one terminal (Metro), `yarn android` in another. No environment file is needed.
+
+Dev builds add an **Open UI kit** button to the Settings tab (`src/screens/KitScreen`), a gallery of the UI components; release builds do not include it.
 
 After adding a native module or a font, rebuild with `yarn android`; a Metro reload is not enough. Fonts live in `src/assets/fonts/` and are linked with `npx react-native-asset`. iOS (Mac only): `bundle install`, `cd ios && bundle exec pod install`, then `yarn ios`. The iOS project has not been built.
 

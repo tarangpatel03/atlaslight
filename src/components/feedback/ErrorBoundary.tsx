@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { AppText } from '@/components/brand/AppText';
-import { AppButton } from '@/components/buttons/AppButton';
+import { AppText } from '@/components/brand';
+import { AppButton } from '@/components/buttons';
 import { colors } from '@/theme/colors';
 import { space } from '@/theme/layout';
 

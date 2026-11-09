@@ -61,20 +61,19 @@ Three families, one job each:
 - **Space Grotesk** (data): `statXl` 44/48, `stat` 28/32, `overline` 11/14 uppercase +0.08em,
   `coord` 12/16. Numbers use tabular figures.
 
-Sentence case everywhere; uppercase only in `overline`. Survive 1.3× system font scale.
+Sentence case everywhere; uppercase only in `overline`. Text is always drawn at 1× (see "Deliberate
+exceptions").
 
 ## Shape and motion
 
 - Corners: soft. `radius.sm` 8 (grid thumbs), `md` 12 (buttons, inputs), `lg` 20 (cards, photos,
   panels), `xl` 28 (sheet top corners), `pill` (chips, search, tab bar, FAB, pins).
 - Spacing: 4 px base. Phone gutter 16 + safe area; tablet gutter 24.
-- Touch targets ≥ 48 dp, even when the visual is smaller (pins, icon buttons).
 - Density: airy on detail screens, compact in lists.
 - Motion personality: **calm, then delightful.** Reanimated springs from `src/theme/motion.ts`:
-  `standard` (presses, pins, switches), `gentle` (sheets, panels). Press = scale 0.97 + light haptic
-  on primary actions. Expressive moments only: pin drop (small overshoot), route replay (line draws,
-  ~1.5 s per 1,000 km), stat numbers count up once (800 ms). Reduce Motion: fades only, no count-up,
-  no replay animation.
+  `standard` (presses, pins, switches), `gentle` (sheets, panels). Press = scale 0.97.
+  Expressive moments only: pin drop (small overshoot), route replay (line draws,
+  ~1.5 s per 1,000 km), stat numbers count up once (800 ms).
 
 ## Components (from the design system)
 
@@ -118,6 +117,8 @@ These are intentional and approved; do not "fix" them:
 - **Teal → violet gradient**: allowed only on routes, rings/progress, live pulse and the live chip;
   never on backgrounds, cards, headings or text.
 - **Glass panels**: only over the map, never on plain screens.
+- **Fixed 1× font scale**: owner decision. `AppText` and `TextField` set
+  `allowFontScaling={false}`, so the system font size is ignored.
 
 ## Must-have screens
 

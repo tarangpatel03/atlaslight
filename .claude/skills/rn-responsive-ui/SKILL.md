@@ -1,6 +1,6 @@
 ---
 name: rn-responsive-ui
-description: Use when building or changing React Native screens or navigation. Covers responsive layout for all phones, tablets and foldables, list-detail split view, safe-area insets, keyboard, font scaling, and device verification.
+description: Use when building or changing React Native screens or navigation. Covers responsive layout for all phones, tablets and foldables, list-detail split view, safe-area insets, keyboard, and device verification.
 ---
 
 # React Native responsive UI
@@ -17,8 +17,7 @@ description: Use when building or changing React Native screens or navigation. C
 - Use `useWindowDimensions()`. Never read `Dimensions.get()` at module scope: it goes stale on rotation, fold/unfold, split-screen and multi-window.
 - Lay out with flex, percentages, `aspectRatio`, `minWidth`/`maxWidth`. Avoid fixed widths/heights on containers.
 - Spacing and sizes come from tokens. If a scaling helper is needed, cap it so tablets do not get giant UI.
-- Text: honor the user's font scale. Let text wrap, design tight UI (tabs, buttons) for 2 lines, and set `maxFontSizeMultiplier` (about 1.3) only where space is tight.
-- Touch targets at least 48dp.
+- Text: let it wrap and design tight UI (tabs, buttons) for 2 lines.
 - Branch on window size class, never on device brand or model.
 
 ## Window size classes (the only place these numbers live)
@@ -49,4 +48,4 @@ Create one hook, `useWindowClass()`, returning `'compact' | 'medium' | 'expanded
 
 - Screenshot the device: `adb shell screencap -p /sdcard/s.png` then `adb pull /sdcard/s.png .claude/tmp/screen.png`, then read the image. Keep `.claude/tmp/` out of git.
 - Check these sizes (Android Studio emulators work: Pixel 8, Pixel Tablet, Resizable/Pixel Fold): small phone 360x640dp, standard 390x844, large 430x932, tablet portrait 800x1280, tablet landscape 1280x800, foldable open about 840x900.
-- Check: nothing under status/nav bars or cutouts, no horizontal overflow, readable at 130% font scale, rotation and resize keep state.
+- Check: nothing under status/nav bars or cutouts, no horizontal overflow, rotation and resize keep state.

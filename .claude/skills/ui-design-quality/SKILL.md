@@ -45,7 +45,7 @@ description: Use before designing or building any UI (screens, components, pages
 
 - Motion explains state change (enter, exit, feedback, hierarchy). It is never decoration that makes the user wait.
 - Durations: micro feedback 100-200ms, element transitions 200-350ms, page or sheet 300-500ms. Ease-out for entering, ease-in for exiting, springs for gestures. Define motion tokens.
-- Animate transform and opacity only. Keep animations interruptible. Respect reduced-motion settings.
+- Animate transform and opacity only. Keep animations interruptible.
 - Every interactive element gives feedback: pressed/hover/focus.
 - Stagger lists subtly: 30-60ms steps, total under ~400ms.
 

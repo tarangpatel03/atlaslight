@@ -2,7 +2,7 @@ import { migrate } from 'drizzle-orm/op-sqlite/migrator';
 import { type PropsWithChildren, type ReactNode, useEffect, useState } from 'react';
 
 import { configureDatabase, db } from '@/db/client';
-import migrations from '@/db/migrations/migrations';
+import migrations from './migrations';
 
 type Status = { state: 'loading' } | { state: 'ready' } | { state: 'error'; error: Error };
 
