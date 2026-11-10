@@ -42,6 +42,7 @@ export const materializeDemoPhoto = async (
     takenAt: meta.takenAt,
     latitude: meta.latitude,
     longitude: meta.longitude,
+    altitude: null,
     sourceAssetId: null,
   };
 };

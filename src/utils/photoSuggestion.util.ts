@@ -9,6 +9,8 @@ export type LocatedPhoto = {
   takenAt: number;
   latitude: number;
   longitude: number;
+  /** Metres above sea level, null when the photo has none. */
+  altitude: number | null;
 };
 
 /** Photos taken in one place at about one time: what "Found in your photos" offers. */
@@ -16,6 +18,8 @@ export type PhotoSuggestion = {
   id: string;
   latitude: number;
   longitude: number;
+  /** The group's first photo's height in metres, null when unknown. */
+  altitude: number | null;
   /** When the first photo of the group was taken. */
   takenAt: number;
   photoCount: number;
@@ -53,6 +57,7 @@ export const groupPhotosByPlace = (photos: LocatedPhoto[]): PhotoSuggestion[] =>
         id: photo.id,
         latitude: photo.latitude,
         longitude: photo.longitude,
+        altitude: photo.altitude,
         takenAt: photo.takenAt,
         photoCount: 1,
         coverUri: photo.uri,

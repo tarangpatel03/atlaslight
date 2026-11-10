@@ -1,4 +1,4 @@
-import { formatDistance, kmToMiles, routeDistanceKm } from './geo.util';
+import { cleanAltitude, formatDistance, kmToMiles, routeDistanceKm } from './geo.util';
 
 const delhi = { latitude: 28.6139, longitude: 77.209 };
 const mumbai = { latitude: 19.076, longitude: 72.8777 };
@@ -38,5 +38,27 @@ describe('formatDistance', () => {
 
   it('switches to miles', () => {
     expect(formatDistance(1240, 'mi')).toBe('771 mi');
+  });
+});
+
+describe('cleanAltitude', () => {
+  it('rounds to whole metres', () => {
+    expect(cleanAltitude(4269.6)).toBe(4270);
+    expect(cleanAltitude(-0.4)).toBe(-0);
+  });
+
+  it('keeps believable heights, including below sea level', () => {
+    expect(cleanAltitude(0)).toBe(0);
+    expect(cleanAltitude(-400)).toBe(-400);
+    expect(cleanAltitude(8849)).toBe(8849);
+  });
+
+  it('drops missing, non-finite and impossible values', () => {
+    expect(cleanAltitude(null)).toBeNull();
+    expect(cleanAltitude(undefined)).toBeNull();
+    expect(cleanAltitude(Number.NaN)).toBeNull();
+    expect(cleanAltitude(Infinity)).toBeNull();
+    expect(cleanAltitude(-600)).toBeNull();
+    expect(cleanAltitude(9500)).toBeNull();
   });
 });

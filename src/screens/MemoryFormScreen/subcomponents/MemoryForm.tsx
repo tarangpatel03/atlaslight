@@ -97,6 +97,7 @@ export const MemoryForm = ({
       title: stop?.title ?? '',
       latitude: stop?.latitude,
       longitude: stop?.longitude,
+      altitude: stop?.altitude ?? null,
       visitedAt: stop?.visitedAt ?? now,
       mood: stop?.mood ?? null,
       note: stop?.note ?? '',
@@ -141,6 +142,7 @@ export const MemoryForm = ({
     if (!found) return;
     setValue('latitude', found.latitude, { shouldValidate: true });
     setValue('longitude', found.longitude, { shouldValidate: true });
+    setValue('altitude', found.altitude);
     if (found.takenAt && !isEdit && !whenTouched) setValue('visitedAt', found.takenAt);
     try {
       const place = await resolvePlace({
@@ -163,6 +165,8 @@ export const MemoryForm = ({
       const place = await savePlace(suggestion).unwrap();
       setValue('latitude', suggestion.latitude, { shouldValidate: true });
       setValue('longitude', suggestion.longitude, { shouldValidate: true });
+      // A searched place has no height of its own, and the old one belonged to the old spot.
+      setValue('altitude', null);
       setPlaceId(place.id);
       setPlaceName(place.name);
     } catch (e) {
@@ -173,9 +177,15 @@ export const MemoryForm = ({
 
   /** A point with no search result behind it (map pick, current location): used as is, then named. */
   const applyPoint = useCallback(
-    async (point: { latitude: number; longitude: number }): Promise<void> => {
+    async (point: {
+      latitude: number;
+      longitude: number;
+      /** Only a GPS fix knows it; a map pick clears the old height. */
+      altitude?: number | null;
+    }): Promise<void> => {
       setValue('latitude', point.latitude, { shouldValidate: true });
       setValue('longitude', point.longitude, { shouldValidate: true });
+      setValue('altitude', point.altitude ?? null);
       try {
         const place = await resolvePlace({ ...point, source: 'manual' }).unwrap();
         setPlaceId(place?.id ?? null);
@@ -222,6 +232,7 @@ export const MemoryForm = ({
   const useSuggestion = async (suggestion: PhotoSuggestion): Promise<void> => {
     setValue('latitude', suggestion.latitude, { shouldValidate: true });
     setValue('longitude', suggestion.longitude, { shouldValidate: true });
+    setValue('altitude', suggestion.altitude);
     setValue('visitedAt', suggestion.takenAt);
     setWhenTouched(true);
     try {

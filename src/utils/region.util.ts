@@ -22,7 +22,7 @@ export type VisitedRegions = { countryCodes: string[]; states: string[] };
 
 const INDIA_CODE = 'IN';
 
-const bundled: RegionData = { countries, states: indiaStates };
+export const bundled: RegionData = { countries, states: indiaStates };
 
 type Box = [number, number, number, number];
 

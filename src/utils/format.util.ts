@@ -15,6 +15,34 @@ const MONTHS = [
   'Dec',
 ] as const;
 
+const FULL_MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+/** `Mar 2026`, or `March 2026` with `'long'`, in the device's local time. */
+export const formatMonthYear = (ms: number, style: 'long' | 'short' = 'short'): string => {
+  const date = new Date(ms);
+  const months = style === 'long' ? FULL_MONTHS : MONTHS;
+  return `${months[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+/** `31% of the way around the Earth`, or `2.3 times around the Earth` from one lap up. */
+export const formatEarthProgress = (fraction: number): string =>
+  fraction < 1
+    ? `${Math.round(fraction * 100)}% of the way around the Earth`
+    : `${fraction.toFixed(1)} times around the Earth`;
+
 /** `13 Mar 2026`, in the device's local time. */
 export const formatDate = (ms: number): string => {
   const date = new Date(ms);
@@ -44,6 +72,10 @@ export const formatDateRange = (startMs: number, endMs: number | null): string =
   }
   return `${formatDate(startMs)} – ${formatDate(endMs)}`;
 };
+
+/** `’26`: a year on a chart axis, where four digits would crowd the bars. */
+export const formatShortYear = (year: number): string =>
+  `’${String(year % 100).padStart(2, '0')}`;
 
 /** `1 memory`, `6 memories`. */
 export const formatCount = (count: number, singular: string, plural: string): string =>

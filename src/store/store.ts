@@ -11,13 +11,14 @@ import {
   REHYDRATE,
 } from 'redux-persist';
 import { baseApi } from '@/api/baseApi';
-import { journeysUiReducer, mapUiReducer, settingsReducer } from './slices';
+import { journeysUiReducer, mapUiReducer, settingsReducer, statsUiReducer } from './slices';
 
 const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   settings: settingsReducer,
   journeysUi: journeysUiReducer,
   mapUi: mapUiReducer,
+  statsUi: statsUiReducer,
 });
 
 const persistedReducer = persistReducer(

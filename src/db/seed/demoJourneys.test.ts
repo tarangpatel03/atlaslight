@@ -1,3 +1,4 @@
+import { cleanAltitude } from '@/utils/geo.util';
 import { journeySchema, memorySchema } from '@/utils/validation.util';
 
 import { DEMO_JOURNEYS, demoJourneyDates, demoStopVisitedAt } from './demoJourneys';
@@ -45,6 +46,7 @@ describe('demo journeys', () => {
           mood: item.mood,
           latitude: item.latitude,
           longitude: item.longitude,
+          altitude: item.altitude,
           visitedAt,
           mediaCount: item.photos.length,
         });
@@ -63,6 +65,13 @@ describe('demo journeys', () => {
     expect(Math.round((NOW - startDate) / 86400000)).toBe(6);
     for (const item of ongoing.stops)
       expect(demoStopVisitedAt(startDate, item)).toBeLessThanOrEqual(NOW);
+  });
+
+  it('gives every memory a believable altitude, with Spiti above 4,000 m', () => {
+    const all = DEMO_JOURNEYS.flatMap((j) => j.stops);
+    for (const item of all) expect(cleanAltitude(item.altitude)).toBe(item.altitude);
+    const spiti = DEMO_JOURNEYS.find((j) => j.slug === 'spiti-valley');
+    expect(Math.max(...(spiti?.stops ?? []).map((s) => s.altitude))).toBeGreaterThan(4000);
   });
 
   it('leaves some memories without a photo', () => {

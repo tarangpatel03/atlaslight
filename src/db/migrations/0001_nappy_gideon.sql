@@ -1,0 +1,1 @@
+ALTER TABLE `stops` ADD `altitude` real;

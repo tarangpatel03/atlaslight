@@ -6,6 +6,8 @@
  * Pure functions, unit-tested in exif.util.test.ts.
  */
 
+import { cleanAltitude } from '@/utils/geo.util';
+
 export type Exif = Record<string, unknown> | null | undefined;
 
 export type GeoPoint = { latitude: number; longitude: number };
@@ -15,7 +17,7 @@ export const parseDms = (value: unknown): number | null => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
   if (typeof value !== 'string' || value.trim() === '') return null;
 
-  const parts = value.split(',').map(part => {
+  const parts = value.split(',').map((part) => {
     const [num, den] = part.trim().split('/').map(Number);
     if (!Number.isFinite(num)) return NaN;
     return den === undefined ? num : den === 0 ? NaN : num / den;
@@ -55,6 +57,26 @@ export const extractGps = (exif: Exif): GeoPoint | null => {
   const lat = applyRef(rawLat, exif.GPSLatitudeRef, 'S');
   const lng = applyRef(rawLng, exif.GPSLongitudeRef, 'W');
   return isValidPoint(lat, lng) ? { latitude: lat, longitude: lng } : null;
+};
+
+// Ref 1 = below sea level; the picker may hand it over as a number or a string.
+const isBelowSeaLevel = (ref: unknown): boolean => Number(ref) === 1;
+
+/** Height above sea level in whole metres from EXIF (iOS nested or Android flat keys), or null when missing. */
+export const extractAltitude = (exif: Exif): number | null => {
+  if (!exif) return null;
+
+  // iOS
+  const gps = exif['{GPS}'];
+  if (isRecord(gps) && gps.Altitude !== undefined) {
+    const value = Number(gps.Altitude);
+    return cleanAltitude(isBelowSeaLevel(gps.AltitudeRef) ? -Math.abs(value) : value);
+  }
+
+  // Android: a rational such as "5359/1"
+  const raw = parseDms(exif.GPSAltitude);
+  if (raw === null) return null;
+  return cleanAltitude(isBelowSeaLevel(exif.GPSAltitudeRef) ? -Math.abs(raw) : raw);
 };
 
 /**

@@ -1,5 +1,6 @@
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { cleanAltitude } from '@/utils/geo.util';
 import type { LocatedPhoto } from '@/utils/photoSuggestion.util';
 
 /** Most photos read for one search; reading a location per photo is slow on Android. */
@@ -25,9 +26,14 @@ export const requestPhotoAccess = async (): Promise<PhotoAccess> => {
         ? [PERMISSIONS.READ_MEDIA_IMAGES]
         : [PERMISSIONS.READ_EXTERNAL_STORAGE];
   // Already allowed (fully or limited): do not ask again, each ask reopens the picker for limited access.
-  const already = await Promise.all(reads.map((permission) => PermissionsAndroid.check(permission)));
+  const already = await Promise.all(
+    reads.map((permission) => PermissionsAndroid.check(permission)),
+  );
   if (already.some(Boolean)) return 'granted';
-  const results = await PermissionsAndroid.requestMultiple([...reads, PERMISSIONS.ACCESS_MEDIA_LOCATION]);
+  const results = await PermissionsAndroid.requestMultiple([
+    ...reads,
+    PERMISSIONS.ACCESS_MEDIA_LOCATION,
+  ]);
   return reads.some((permission) => wasGranted(results[permission])) ? 'granted' : 'denied';
 };
 
@@ -58,6 +64,7 @@ export const findLocatedPhotos = async (
       takenAt: node.timestamp * 1000,
       latitude,
       longitude,
+      altitude: cleanAltitude(location.altitude),
     });
   }
   return photos;

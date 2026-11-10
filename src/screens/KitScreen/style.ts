@@ -6,6 +6,8 @@ export const styles = StyleSheet.create({
   root: { flex: 1 },
   scroll: { paddingTop: space[4] },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space[3], alignItems: 'center' },
+  stack: { gap: space[4] },
+  scratchCard: { height: 300, borderRadius: radius.lg, overflow: 'hidden' },
   iconCell: {
     width: sizes.touchMin,
     height: sizes.touchMin,

@@ -29,6 +29,7 @@ describe('toStopInput', () => {
     title: '  Fort Kochi walk ',
     latitude: 9.96,
     longitude: 76.24,
+    altitude: null,
     visitedAt: 1,
     mood: null,
     mediaCount: 0,
@@ -38,6 +39,11 @@ describe('toStopInput', () => {
     const input = toStopInput({ ...base, note: '  sunrise  ' });
     expect(input.title).toBe('Fort Kochi walk');
     expect(input.note).toBe('sunrise');
+  });
+
+  it('passes the altitude through', () => {
+    expect(toStopInput({ ...base, altitude: 4270 }).altitude).toBe(4270);
+    expect(toStopInput(base).altitude).toBeNull();
   });
 
   it('turns an empty or missing note into null', () => {

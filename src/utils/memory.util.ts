@@ -19,12 +19,16 @@ export const mergeTime = (visitedAt: number, hours: number, minutes: number): nu
 /** Fields saved with a memory: the note is trimmed and an empty note becomes null. */
 export const toStopInput = (
   values: MemoryFormValues,
-): Pick<MemoryFormValues, 'title' | 'latitude' | 'longitude' | 'visitedAt' | 'mood'> & {
+): Pick<
+  MemoryFormValues,
+  'title' | 'latitude' | 'longitude' | 'altitude' | 'visitedAt' | 'mood'
+> & {
   note: string | null;
 } => ({
   title: values.title.trim(),
   latitude: values.latitude,
   longitude: values.longitude,
+  altitude: values.altitude,
   visitedAt: values.visitedAt,
   mood: values.mood,
   note: values.note?.trim() ? values.note.trim() : null,

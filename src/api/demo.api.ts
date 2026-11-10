@@ -1,4 +1,4 @@
-import { inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import {
@@ -9,7 +9,11 @@ import {
 } from '@/db/seed/demoJourneys';
 import { journeys, media, places, stops } from '@/db/schema';
 import { materializeDemoPhoto, removeTempFiles } from '@/services/demoAssets.service';
-import { deleteJourneyFolder, importMediaBatch, type StoredMedia } from '@/services/mediaStorage.service';
+import {
+  deleteJourneyFolder,
+  importMediaBatch,
+  type StoredMedia,
+} from '@/services/mediaStorage.service';
 import type { PickedMedia } from '@/services/picker.service';
 import { nextJourneyColor } from '@/utils/journey.util';
 import { baseApi, runDb } from '@/api/baseApi';
@@ -75,6 +79,7 @@ const seedJourney = async (demo: DemoJourney): Promise<void> => {
           placeId,
           latitude: item.latitude,
           longitude: item.longitude,
+          altitude: item.altitude,
           title: item.title,
           note: item.note,
           mood: item.mood,
@@ -94,6 +99,17 @@ const seedJourney = async (demo: DemoJourney): Promise<void> => {
   }
 };
 
+/** Demo memories loaded before altitude existed get their height; heights the user already set stay. */
+const backfillAltitudes = async (demo: DemoJourney): Promise<void> => {
+  const journeyId = journeyIdOf(demo);
+  for (const [index, item] of demo.stops.entries()) {
+    await db
+      .update(stops)
+      .set({ altitude: item.altitude })
+      .where(and(eq(stops.id, `${journeyId}-${index + 1}`), isNull(stops.altitude)));
+  }
+};
+
 export const demoApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     /** Adds the demo journeys that are not there yet; a second run adds nothing. */
@@ -108,7 +124,10 @@ export const demoApi = baseApi.injectEndpoints({
 
           let added = 0;
           for (const demo of DEMO_JOURNEYS) {
-            if (loaded.has(journeyIdOf(demo))) continue;
+            if (loaded.has(journeyIdOf(demo))) {
+              await backfillAltitudes(demo);
+              continue;
+            }
             await seedJourney(demo);
             added += 1;
           }

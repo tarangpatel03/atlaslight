@@ -1,9 +1,12 @@
 import {
   formatCount,
   formatDate,
+  formatEarthProgress,
+  formatMonthYear,
   formatDateRange,
   formatRelativeDay,
   formatShortDateTime,
+  formatShortYear,
   formatTime,
 } from './format.util';
 
@@ -88,5 +91,33 @@ describe('formatTime', () => {
 describe('formatShortDateTime', () => {
   it('joins day, month and time without the year', () => {
     expect(formatShortDateTime(new Date(2026, 5, 6, 23, 30).getTime())).toBe('6 Jun · 11:30 pm');
+  });
+});
+
+describe('formatShortYear', () => {
+  it('keeps the last two digits behind a typographic apostrophe', () => {
+    expect(formatShortYear(2026)).toBe('’26');
+    expect(formatShortYear(2009)).toBe('’09');
+    expect(formatShortYear(2100)).toBe('’00');
+  });
+});
+
+describe('formatMonthYear', () => {
+  it('shortens the month by default and spells it out on request', () => {
+    const ms = new Date(2019, 2, 14, 12).getTime();
+    expect(formatMonthYear(ms)).toBe('Mar 2019');
+    expect(formatMonthYear(ms, 'long')).toBe('March 2019');
+  });
+});
+
+describe('formatEarthProgress', () => {
+  it('gives a percentage below one lap', () => {
+    expect(formatEarthProgress(0)).toBe('0% of the way around the Earth');
+    expect(formatEarthProgress(0.3114)).toBe('31% of the way around the Earth');
+  });
+
+  it('counts laps from one up', () => {
+    expect(formatEarthProgress(1)).toBe('1.0 times around the Earth');
+    expect(formatEarthProgress(2.34)).toBe('2.3 times around the Earth');
   });
 });

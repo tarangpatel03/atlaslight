@@ -36,13 +36,18 @@ export type CreateStopInput = {
   visitedAt: number;
   latitude: number;
   longitude: number;
+  /** Metres above sea level; null or left out when unknown. */
+  altitude?: number | null;
   placeId?: string | null;
   /** First item becomes the cover. */
   media: PickedMedia[];
 };
 
 export type UpdateStopInput = { id: string; journeyId: string } & Partial<
-  Pick<Stop, 'title' | 'note' | 'mood' | 'visitedAt' | 'latitude' | 'longitude' | 'placeId'>
+  Pick<
+    Stop,
+    'title' | 'note' | 'mood' | 'visitedAt' | 'latitude' | 'longitude' | 'altitude' | 'placeId'
+  >
 >;
 
 export type AddMediaInput = { stopId: string; journeyId: string; media: PickedMedia[] };
@@ -99,7 +104,9 @@ export const stopsApi = baseApi.injectEndpoints({
                 order by ${media.sortOrder} limit 1
               )`,
               // Plain SQL: with a single-table select Drizzle drops the table prefix from interpolated columns.
-              placeName: sql<string | null>`(select places.name from places where places.id = stops.place_id)`,
+              placeName: sql<
+                string | null
+              >`(select places.name from places where places.id = stops.place_id)`,
             })
             .from(stops)
             .leftJoin(media, eq(media.stopId, stops.id))
@@ -173,11 +180,11 @@ export const stopsApi = baseApi.injectEndpoints({
 
     updateStop: build.mutation<Stop, UpdateStopInput>({
       // Fields are listed one by one so `journeyId` (used only for cache tags) is never written.
-      queryFn: ({ id, title, note, mood, visitedAt, latitude, longitude, placeId }) =>
+      queryFn: ({ id, title, note, mood, visitedAt, latitude, longitude, altitude, placeId }) =>
         runDb(async () => {
           const [row] = await db
             .update(stops)
-            .set({ title, note, mood, visitedAt, latitude, longitude, placeId })
+            .set({ title, note, mood, visitedAt, latitude, longitude, altitude, placeId })
             .where(eq(stops.id, id))
             .returning();
           if (!row) throw new Error('Memory not found');

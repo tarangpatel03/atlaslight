@@ -3,12 +3,19 @@ import { groupPhotosByPlace, journeyPhotoWindow, type LocatedPhoto } from './pho
 const HOUR = 60 * 60 * 1000;
 const at = (day: number, hour: number): number => new Date(2026, 10, day, hour, 0).getTime();
 
-const photo = (id: string, takenAt: number, latitude: number, longitude: number): LocatedPhoto => ({
+const photo = (
+  id: string,
+  takenAt: number,
+  latitude: number,
+  longitude: number,
+  altitude: number | null = null,
+): LocatedPhoto => ({
   id,
   uri: `file:///${id}.jpg`,
   takenAt,
   latitude,
   longitude,
+  altitude,
 });
 
 describe('journeyPhotoWindow', () => {
@@ -31,6 +38,14 @@ describe('groupPhotosByPlace', () => {
     ]);
     expect(groups).toHaveLength(1);
     expect(groups[0]).toMatchObject({ id: 'a', photoCount: 2, takenAt: at(5, 10) });
+  });
+
+  it("keeps the first photo's altitude for the group", () => {
+    const groups = groupPhotosByPlace([
+      photo('a', at(5, 10), 8.7333, 76.7, 12),
+      photo('b', at(5, 11), 8.7336, 76.7004, 99),
+    ]);
+    expect(groups[0].altitude).toBe(12);
   });
 
   it('splits by distance', () => {

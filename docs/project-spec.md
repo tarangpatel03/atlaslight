@@ -29,8 +29,7 @@ notes, moods) to places, and watch one dark world map fill with amber pins and a
    visited countries/states filled amber, aurora route lines, live location, wishlist pins.
 5. Journey detail: cover, stats, route map with **Replay route**, timeline.
 6. Memory detail: photo/video pager, place + coordinates, mood, note, media grid, mini map.
-7. Stats: distance, countries, Indian states & UTs, journeys per year, most visited states,
-   % of India, highest point, scratch map (India / World).
+7. Stats: distance, countries, journeys per year, highest point, scratch map (world only in v1).
 8. Wishlist: places to visit, shown as violet pins.
 9. On this day: a memory from the same date in a past year, on the map screen.
 10. Settings: backup export/import (.zip), suggest trips from photos toggle, map toggles, units,
@@ -105,7 +104,7 @@ epoch milliseconds (numbers, not Date objects, so Redux stays serializable).
 | Table              | Key fields                                                                                                                                                          | Notes                               |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | `journeys`         | id, title, description, coverMediaId → media (set null), color, startDate, endDate (null = ongoing), isFavorite, createdAt, updatedAt                               |                                     |
-| `stops` (memories) | id, journeyId → journeys (cascade), placeId → places (set null), latitude, longitude, title, note, mood, visitedAt, orderIndex                                      | `orderIndex` = route order          |
+| `stops` (memories) | id, journeyId → journeys (cascade), placeId → places (set null), latitude, longitude, altitude (m, nullable), title, note, mood, visitedAt, orderIndex                                      | `orderIndex` = route order          |
 | `media`            | id, stopId → stops (cascade), type photo/video, filePath, thumbnailPath, width, height, durationMs, takenAt, latitude, longitude, sourceAssetId (unique), sortOrder | paths RELATIVE to the documents dir |
 | `places`           | id, name, locality, adminArea, countryCode, countryName, latitude, longitude, source photon/manual/exif                                                             | reverse-geocode cache               |
 | `wishlist`         | id, placeId → places (unique, cascade), note                                                                                                                        |                                     |
@@ -131,7 +130,7 @@ Layout comes from `useWindowClass`: **compact** (< 600) = phone, **medium/expand
 | Memory detail                       | photo/video pager, place card, mood chips, note, media grid, mini map, Edit/Delete                                                   | shown in the side panel                                         | stop + place + media                                                       |
 | Add / edit memory                   | full screen form: journey selector, photo strip (first = cover), Found in your photos, title, location, date, time, mood, note, Save | centred dialog over the current screen                          | picked media, places search                                                |
 | New / edit journey                  | form: title, description, start/end (ongoing toggle), cover                                                                          | dialog                                                          | —                                                                          |
-| Stats                               | headline, distance + Earth progress, % India ring, tiles, scratch map, journeys per year, most visited                               | 3-column dashboard                                              | computed                                                                   |
+| Stats                               | headline, distance + Earth progress, tiles, scratch map, journeys per year                                                          | 2-column dashboard                                              | computed                                                                   |
 | Settings                            | profile, backup & data, map, permissions, feel, about (Load demo journeys, source link, version), Delete all                         | in the side panel / centred column                              | settings slice, DB size                                                    |
 | Wishlist (from map chip / settings) | list + add place                                                                                                                     | side panel                                                      | wishlist + places                                                          |
 
@@ -189,7 +188,7 @@ get-random-values, react-native-asset.
 - Media: `react-native-image-crop-picker`, `@dr.pogodin/react-native-fs`,
   `react-native-create-thumbnail`, `@bam.tech/react-native-image-resizer`, `react-native-video`,
   `@d11/react-native-fast-image`, `@react-native-camera-roll/camera-roll` (photo-library scan)
-- Stats: `react-native-gifted-charts`
+- Stats: no chart library; the charts are drawn with Views and `react-native-svg` (`react-native-gifted-charts` was not added)
 - Backup & share: `react-native-zip-archive`, `@react-native-documents/picker`, `react-native-share`,
   `react-native-view-shot` (recap cards, later)
 - Dates: `date-fns`

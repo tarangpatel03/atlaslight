@@ -5,6 +5,7 @@ const memory = {
   title: 'Key Monastery',
   latitude: 32.2,
   longitude: 78,
+  altitude: null,
   visitedAt: 1000,
   mood: null,
   mediaCount: 3,
@@ -58,5 +59,7 @@ describe('memorySchema', () => {
     expect(memorySchema.safeParse({ ...memory, mediaCount: 31 }).success).toBe(false);
     expect(memorySchema.safeParse({ ...memory, mood: 'calm' }).success).toBe(true);
     expect(memorySchema.safeParse({ ...memory, mood: 'angry' }).success).toBe(false);
+    expect(memorySchema.safeParse({ ...memory, altitude: 4270 }).success).toBe(true);
+    expect(memorySchema.safeParse({ ...memory, altitude: 12000 }).success).toBe(false);
   });
 });

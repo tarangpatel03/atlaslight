@@ -16,17 +16,31 @@ interface StatTileProps {
   label: string;
   /** 0 to 1: puts the number inside an aurora ring. */
   progress?: number;
+  /** A quiet line under the tile, e.g. "+2 this year". */
+  sub?: string;
+  /** Label above a smaller number (the Stats design); by default it sits under a big one (Journey detail). */
+  labelFirst?: boolean;
+  /** Width the tile asks for before it grows to share its row; a row of narrow tiles passes less than 150. */
+  basis?: number;
 }
 
 /** Big number with a label; counts up once when it first appears. */
-export const StatTile = ({ value, unit, label, progress }: StatTileProps): ReactNode => {
+export const StatTile = ({
+  value,
+  unit,
+  label,
+  progress,
+  sub,
+  labelFirst = false,
+  basis,
+}: StatTileProps): ReactNode => {
   const shown = useCountUp(value);
 
   const inRing = progress !== undefined;
   // In a ring the unit goes under the number so a wide value like "1,240" stays inside the circle.
   const number = (
     <View style={inRing ? styles.numberStacked : styles.number}>
-      <AppText variant={inRing ? 'stat' : 'statXl'}>
+      <AppText variant={inRing || labelFirst ? 'stat' : 'statXl'}>
         {Math.round(shown).toLocaleString('en-US')}
       </AppText>
       {unit ? (
@@ -37,9 +51,16 @@ export const StatTile = ({ value, unit, label, progress }: StatTileProps): React
     </View>
   );
 
+  const labelText = (
+    <AppText variant="overline" color={colors.inkMuted}>
+      {label}
+    </AppText>
+  );
+
   return (
-    <Card style={styles.tile}>
+    <Card style={[styles.tile, basis !== undefined && { flexBasis: basis }]}>
       <View accessible style={styles.content}>
+        {labelFirst ? labelText : null}
         {inRing ? (
           <AuroraRing progress={progress} size={RING_SIZE}>
             {number}
@@ -47,9 +68,12 @@ export const StatTile = ({ value, unit, label, progress }: StatTileProps): React
         ) : (
           number
         )}
-        <AppText variant="overline" color={colors.inkMuted}>
-          {label}
-        </AppText>
+        {labelFirst ? null : labelText}
+        {sub ? (
+          <AppText variant="caption" color={colors.inkMuted}>
+            {sub}
+          </AppText>
+        ) : null}
       </View>
     </Card>
   );

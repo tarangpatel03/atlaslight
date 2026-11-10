@@ -1,9 +1,11 @@
 import Geolocation, { type GeolocationOptions } from '@react-native-community/geolocation';
+import { cleanAltitude } from '@/utils/geo.util';
 import { locationErrorKind, type LocationFailure } from '@/utils/location.util';
 
 export type LocationPoint = { latitude: number; longitude: number };
 
-export type LocationResult = ({ status: 'ok' } & LocationPoint) | { status: LocationFailure };
+export type LocationResult =
+  ({ status: 'ok'; altitude: number | null } & LocationPoint) | { status: LocationFailure };
 
 const FIX_TIMEOUT_MS = 10_000;
 // A fix a few seconds old is fine for centring the map and saves waiting for the GPS.
@@ -35,7 +37,12 @@ export const getCurrentLocation = (): Promise<LocationResult> => {
   return new Promise((resolve) => {
     Geolocation.getCurrentPosition(
       ({ coords }) =>
-        resolve({ status: 'ok', latitude: coords.latitude, longitude: coords.longitude }),
+        resolve({
+          status: 'ok',
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+          altitude: cleanAltitude(coords.altitude),
+        }),
       (error) => resolve({ status: locationErrorKind(error.code) }),
       options,
     );

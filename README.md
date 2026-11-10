@@ -44,9 +44,23 @@ Visited countries and Indian states/UTs are worked out on the device from two bu
 
 Both are simplified to keep them small (about 470 KB and 85 KB). To regenerate (for example after a new Natural Earth release): download `ne_50m_admin_0_countries.geojson` and `ne_10m_admin_1_states_provinces.geojson` from the [natural-earth-vector](https://github.com/nvkelso/natural-earth-vector) repo, keep only the properties above (India = features with `iso_a2 = IN`), then run `npx mapshaper <in>.geojson -simplify 25% keep-shapes -o countries.json format=geojson precision=0.001` (15% for the India file). Nothing is downloaded by the app.
 
+The Stats scratch map draws the countries file as SVG (world only), so it works offline too.
+
 ## Live location
 
 Location is asked only when you tap the Locate button on the Map, and only while the app is open: the position is followed while the Map tab is showing and the GPS stops when you leave it. There is no background location, nothing is stored and nothing leaves the device. Permissions are `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION` (Android manifest) and the location text in `Info.plist`; the code is `src/services/location.service.ts`.
+
+A memory can also keep its height above sea level (metres, optional). It comes from a photo's EXIF, from the photo library, or from a Locate fix in the memory form, and it stays on the device; the Stats screen uses it for your highest point.
+
+## Stats
+
+The Stats tab is worked out on the device from your journeys and memories, with no network. `src/utils/stats.util.ts` holds the maths (tested); `src/api/stats.api.ts` reads the data and looks up each memory's country once per change. Stats is world-only for version 1: no per-country or India-specific numbers.
+
+- **Distance** is the great-circle length along each journey's route order, summed over journeys. The Earth bar compares it with 40,075 km; the unit follows the km / mi setting.
+- **Countries** come from the bundled countries file (see Map data).
+- **Year chips**: a journey counts for the year it starts in. "+N this year" counts countries first visited in that year, measured against every memory ever.
+- **Highest point** is the highest memory that has an altitude (see Live location); the tile is hidden when none does.
+- **Layouts**: windows 900 dp and wider get a 2-column dashboard, narrower ones a single column (centred and capped at 640 dp).
 
 ## Database
 
