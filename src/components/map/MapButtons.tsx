@@ -4,16 +4,14 @@ import { IconButton } from '@/components/buttons';
 import { space } from '@/theme/layout';
 
 interface MapButtonsProps {
-  onFit: () => void;
   onLocate: () => void;
   /** Waiting for the first position fix. */
   locating?: boolean;
 }
 
-/** Round glass buttons on the map's right edge: frame all memories, go to my location. */
-export const MapButtons = ({ onFit, onLocate, locating = false }: MapButtonsProps): ReactNode => (
+/** Round glass buttons on the map's right edge: go to my location. */
+export const MapButtons = ({ onLocate, locating = false }: MapButtonsProps): ReactNode => (
   <View style={styles.column}>
-    <IconButton icon="fit" onPress={onFit} />
     <IconButton icon="locate" onPress={onLocate} disabled={locating} />
   </View>
 );

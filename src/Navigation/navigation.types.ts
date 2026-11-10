@@ -14,6 +14,10 @@ export type RootStackParamList = {
   [SCREENS.JourneyDetail]: { journeyId: string };
   [SCREENS.JourneyForm]: { journeyId?: string } | undefined;
   [SCREENS.MemoryDetail]: { stopId: string };
-  [SCREENS.MemoryForm]: { journeyId?: string; stopId?: string } | undefined;
+  [SCREENS.MemoryForm]:
+    | { journeyId?: string; stopId?: string; picked?: { latitude: number; longitude: number } }
+    | undefined;
+  /** Where the map opens: the memory's current point, else the journey's memories, else the world. */
+  [SCREENS.MapPick]: { latitude?: number; longitude?: number; journeyId?: string };
   [SCREENS.Kit]: undefined;
 };

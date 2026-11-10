@@ -72,6 +72,7 @@ export const MemoryFormScreen = ({ navigation, route }: MemoryFormScreenProps): 
       journeyId={route.params?.journeyId}
       dialog={dialog}
       gutter={gutter}
+      picked={route.params?.picked}
       onClose={close}
       onDeleting={setDeleting}
     />

@@ -1,4 +1,5 @@
-import type { Feature, FeatureCollection, LineString, Point } from 'geojson';
+import distance from '@turf/distance';
+import type { Feature, FeatureCollection, LineString, Point, Position } from 'geojson';
 
 /** What the map needs from a stop. The map data API (`map.api.ts`) fills it from the database. */
 export type MapStop = {
@@ -97,7 +98,7 @@ export const journeyRoutes = (stops: MapStop[]): FeatureCollection<LineString, R
 const MIN_SPAN_DEGREES = 0.05;
 
 /** Box around the stops for fit-to-bounds; null with no stops. Never smaller than a town. */
-export const stopsBounds = (stops: MapStop[]): Bounds | null => {
+export const stopsBounds = (stops: Pick<MapStop, 'latitude' | 'longitude'>[]): Bounds | null => {
   if (stops.length === 0) return null;
   let west = Infinity;
   let south = Infinity;
@@ -117,4 +118,38 @@ export const stopsBounds = (stops: MapStop[]): Bounds | null => {
   const [paddedWest, paddedEast] = pad(west, east);
   const [paddedSouth, paddedNorth] = pad(south, north);
   return [paddedWest, paddedSouth, paddedEast, paddedNorth];
+};
+
+/**
+ * The part of a route from its start to `fraction` (0 to 1) of its length, ending on a point
+ * interpolated inside the current leg; `head` is that end point. Null for fewer than two points.
+ * Used by Replay route to draw the line growing.
+ */
+export const routeSlice = (
+  coordinates: Position[],
+  fraction: number,
+): { line: Position[]; head: Position } | null => {
+  if (coordinates.length < 2) return null;
+  const legs = coordinates.slice(1).map((to, i) => distance(coordinates[i], to));
+  const total = legs.reduce((sum, leg) => sum + leg, 0);
+  const clamped = Math.min(1, Math.max(0, fraction));
+  const last = coordinates[coordinates.length - 1];
+  if (total === 0 || clamped >= 1) return { line: coordinates, head: last };
+
+  let remaining = clamped * total;
+  const line: Position[] = [coordinates[0]];
+  for (let i = 0; i < legs.length; i += 1) {
+    if (remaining >= legs[i]) {
+      remaining -= legs[i];
+      line.push(coordinates[i + 1]);
+      continue;
+    }
+    const t = legs[i] === 0 ? 0 : remaining / legs[i];
+    const [fromLng, fromLat] = coordinates[i];
+    const [toLng, toLat] = coordinates[i + 1];
+    const head: Position = [fromLng + (toLng - fromLng) * t, fromLat + (toLat - fromLat) * t];
+    line.push(head);
+    return { line, head };
+  }
+  return { line, head: last };
 };

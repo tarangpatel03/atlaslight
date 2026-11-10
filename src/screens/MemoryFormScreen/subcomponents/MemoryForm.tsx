@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRef, useState, type ReactNode } from 'react';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useGetJourneysQuery } from '@/api/journeys.api';
@@ -18,8 +19,11 @@ import { Chip, DateField, TextField, TimeField } from '@/components/inputs';
 import { FormFrame } from '@/components/layout';
 import { ConfirmSheet, type AppBottomSheetRef } from '@/components/surfaces';
 import { MOODS, type Mood } from '@/db/moods';
+import { getCurrentLocation } from '@/services/location.service';
 import { pickFromLibrary, captureWithCamera, suggestFromMedia } from '@/services/picker.service';
 import type { PickedMedia } from '@/services/picker.service';
+import type { RootStackParamList } from '@/Navigation/navigation.types';
+import { SCREENS } from '@/Navigation/routes';
 import { colors } from '@/theme/colors';
 import { space } from '@/theme/layout';
 import type { PlaceSuggestion } from '@/utils/photon.util';
@@ -40,6 +44,8 @@ interface MemoryFormProps {
   dialog: boolean;
   gutter: number;
   onClose: () => void;
+  /** A spot chosen on the map screen; the form takes it once and names it. */
+  picked?: { latitude: number; longitude: number };
   /** Called with true when a delete starts (and false if it fails), so the screen stops reloading the memory. */
   onDeleting: (deleting: boolean) => void;
 }
@@ -61,10 +67,12 @@ export const MemoryForm = ({
   journeyId,
   dialog,
   gutter,
+  picked: pickedSpot,
   onClose,
   onDeleting,
 }: MemoryFormProps): ReactNode => {
   const isEdit = stop !== null;
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { data: journeys } = useGetJourneysQuery();
   const [createStop, { isLoading: creating }] = useCreateStopMutation();
   const [updateStop, { isLoading: updating }] = useUpdateStopMutation();
@@ -113,7 +121,9 @@ export const MemoryForm = ({
   // A new memory goes to the journey it was opened from, else the ongoing one, else the newest.
   const targetJourney = chosenJourney ?? pickOngoing(journeys ?? [])?.id ?? (journeys ?? [])[0]?.id;
   // Where "Found in your photos" looks: the days of the memory's journey.
-  const searchJourney = (journeys ?? []).find((item) => item.id === (stop?.journeyId ?? targetJourney));
+  const searchJourney = (journeys ?? []).find(
+    (item) => item.id === (stop?.journeyId ?? targetJourney),
+  );
   const photoWindow = searchJourney
     ? journeyPhotoWindow(searchJourney.startDate, searchJourney.endDate, now)
     : null;
@@ -160,6 +170,53 @@ export const MemoryForm = ({
       throw e;
     }
   };
+
+  /** A point with no search result behind it (map pick, current location): used as is, then named. */
+  const applyPoint = useCallback(
+    async (point: { latitude: number; longitude: number }): Promise<void> => {
+      setValue('latitude', point.latitude, { shouldValidate: true });
+      setValue('longitude', point.longitude, { shouldValidate: true });
+      try {
+        const place = await resolvePlace({ ...point, source: 'manual' }).unwrap();
+        setPlaceId(place?.id ?? null);
+        setPlaceName(place?.name ?? null);
+      } catch {
+        // The name is a nicety; the coordinates are enough to save.
+        setPlaceId(null);
+        setPlaceName(null);
+      }
+    },
+    [resolvePlace, setValue],
+  );
+
+  // The map screen sends its spot back as a param; each spot is taken once.
+  useEffect(() => {
+    if (!pickedSpot) return;
+    // Deferred a tick: applying the spot sets several form states, which must not happen inside the effect itself.
+    const timer = setTimeout(() => {
+      void applyPoint(pickedSpot);
+      navigation.setParams({ picked: undefined });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [pickedSpot, applyPoint, navigation]);
+
+  const locateMe = async (): Promise<void> => {
+    const result = await getCurrentLocation();
+    if (result.status === 'ok') {
+      await applyPoint(result);
+    } else if (result.status === 'denied') {
+      showToast.error('Location is off for Atlaslight', 'Allow it in your phone settings.');
+    } else {
+      showToast.error("Couldn't find your location", 'Check that location is on and try again.');
+    }
+  };
+
+  const pickOnMap = (): void =>
+    navigation.navigate(SCREENS.MapPick, {
+      latitude,
+      longitude,
+      journeyId: stop?.journeyId ?? targetJourney,
+    });
 
   /** A place found in the photos: its position and time fill the form, then the point is named. */
   const useSuggestion = async (suggestion: PhotoSuggestion): Promise<void> => {
@@ -357,9 +414,13 @@ export const MemoryForm = ({
           />
 
           <PlaceField
-            selectedLabel={hasLocation ? (placeName ?? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`) : null}
+            selectedLabel={
+              hasLocation ? (placeName ?? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`) : null
+            }
             error={errors.latitude?.message}
             onSelect={choosePlace}
+            onUseLocation={locateMe}
+            onPickOnMap={pickOnMap}
           />
 
           <Controller

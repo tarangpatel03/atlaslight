@@ -8,6 +8,6 @@ export const styles = StyleSheet.create({
   // Search, results and chips float over the map; touches outside them pass through to it.
   top: { position: 'absolute', top: 0, left: 0, right: 0, paddingTop: space[2], gap: space[2] },
   bottom: { position: 'absolute', alignItems: 'flex-end', gap: space[3] },
-  // Bottom-left, above the map attribution.
+  // Bottom-left of the map.
   onThisDay: { position: 'absolute', left: 0 },
 });

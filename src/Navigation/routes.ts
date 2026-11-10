@@ -14,6 +14,8 @@ export const SCREENS = {
   MemoryDetail: 'MemoryDetail',
   /** New memory (no stop id) or edit memory (with `stopId`): a full screen on phones, a dialog on wider windows. */
   MemoryForm: 'MemoryForm',
+  /** Full screen map with a fixed centre mark: pan the map, then use that spot as a memory's location. */
+  MapPick: 'MapPick',
   /** Dev-only component gallery; registered only in `__DEV__`. */
   Kit: 'Kit',
 } as const;

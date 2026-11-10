@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useSearchPlacesQuery } from '@/api/places.api';
 import { AppText, Icon } from '@/components/brand';
+import { AppButton } from '@/components/buttons';
 import { TextField } from '@/components/inputs';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { colors } from '@/theme/colors';
@@ -19,6 +20,10 @@ interface PlaceFieldProps {
   error?: string;
   /** Called with the search result the user tapped. */
   onSelect: (place: PlaceSuggestion) => Promise<void>;
+  /** Uses where the phone is now; resolves when the fix (or its failure) is handled. */
+  onUseLocation: () => Promise<void>;
+  /** Opens the full screen map to choose the spot. */
+  onPickOnMap: () => void;
 }
 
 const subtitleOf = (place: PlaceSuggestion): string =>
@@ -27,10 +32,17 @@ const subtitleOf = (place: PlaceSuggestion): string =>
     .join(', ');
 
 /** The memory's place: shows the chosen one, or a search box with Photon results to pick from. */
-export const PlaceField = ({ selectedLabel, error, onSelect }: PlaceFieldProps): ReactNode => {
+export const PlaceField = ({
+  selectedLabel,
+  error,
+  onSelect,
+  onUseLocation,
+  onPickOnMap,
+}: PlaceFieldProps): ReactNode => {
   const [changing, setChanging] = useState(false);
   const [text, setText] = useState('');
   const [saving, setSaving] = useState(false);
+  const [locating, setLocating] = useState(false);
   const query = useDebouncedValue(text.trim(), SEARCH_DELAY_MS);
   const searching = query.length >= MIN_QUERY_LENGTH;
   const { data, isFetching, isError } = useSearchPlacesQuery(query, { skip: !searching });
@@ -45,6 +57,41 @@ export const PlaceField = ({ selectedLabel, error, onSelect }: PlaceFieldProps):
       setSaving(false);
     }
   };
+
+  const findMe = async (): Promise<void> => {
+    setLocating(true);
+    try {
+      await onUseLocation();
+      setChanging(false);
+      setText('');
+    } finally {
+      setLocating(false);
+    }
+  };
+
+  const shortcuts = (
+    <View style={styles.shortcuts}>
+      <View style={styles.shortcut}>
+        <AppButton
+          label="My location"
+          variant="secondary"
+          icon="locate"
+          loading={locating}
+          disabled={saving}
+          onPress={() => void findMe()}
+        />
+      </View>
+      <View style={styles.shortcut}>
+        <AppButton
+          label="Pick on map"
+          variant="secondary"
+          icon="map"
+          disabled={saving || locating}
+          onPress={onPickOnMap}
+        />
+      </View>
+    </View>
+  );
 
   if (selectedLabel !== null && !changing) {
     return (
@@ -61,6 +108,7 @@ export const PlaceField = ({ selectedLabel, error, onSelect }: PlaceFieldProps):
             </AppText>
           </Pressable>
         </View>
+        {shortcuts}
       </View>
     );
   }
@@ -78,6 +126,7 @@ export const PlaceField = ({ selectedLabel, error, onSelect }: PlaceFieldProps):
         autoCapitalize="none"
         autoCorrect={false}
       />
+      {shortcuts}
       {changing ? (
         <Pressable onPress={() => setChanging(false)} hitSlop={space[2]}>
           <AppText variant="label" color={colors.inkMuted}>
@@ -141,6 +190,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space[4],
   },
   chosenText: { flex: 1 },
+  shortcuts: { flexDirection: 'row', gap: space[2] },
+  shortcut: { flex: 1 },
   loading: { alignSelf: 'flex-start' },
   results: {
     borderRadius: radius.md,

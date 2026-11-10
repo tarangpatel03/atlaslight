@@ -29,10 +29,12 @@ type JourneyDetailScreenProps = NativeStackScreenProps<
 
 const HERO_HEIGHT_PHONE = 260;
 const HERO_HEIGHT_TABLET = 220;
+const MAP_HEIGHT_PHONE = 220;
+const MAP_HEIGHT_TABLET = 320;
 
 /**
- * One journey. Phone: hero, numbers, map slot and the timeline in one scroll, with Add memory pinned
- * below. Tablet: a hero band, then the numbers and map slot beside the timeline.
+ * One journey. Phone: hero, numbers, route map and the timeline in one scroll, with Add memory pinned
+ * below. Tablet: a hero band, then the numbers and route map beside the timeline.
  */
 export const JourneyDetailScreen = ({ route }: JourneyDetailScreenProps): ReactNode => {
   const { journeyId } = route.params;
@@ -88,7 +90,16 @@ export const JourneyDetailScreen = ({ route }: JourneyDetailScreenProps): ReactN
       onEdit={edit}
     />
   );
-  const body = <JourneyBody journey={journey} units={units} gutter={isCompact ? margin : 0} />;
+  const body = (
+    <JourneyBody
+      journey={journey}
+      units={units}
+      gutter={isCompact ? margin : 0}
+      stops={stops}
+      mapHeight={isCompact ? MAP_HEIGHT_PHONE : MAP_HEIGHT_TABLET}
+      onOpenMemory={(stopId) => navigation.navigate(SCREENS.MemoryDetail, { stopId })}
+    />
+  );
   const timelineTitle = (
     <AppText variant="overline" color={colors.inkMuted}>
       Timeline

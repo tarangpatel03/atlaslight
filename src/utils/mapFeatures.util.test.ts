@@ -2,6 +2,7 @@ import {
   type MapStop,
   filterMapStops,
   journeyRoutes,
+  routeSlice,
   stopsBounds,
   stopsToPoints,
 } from './mapFeatures.util';
@@ -144,5 +145,47 @@ describe('stopsBounds', () => {
     expect(north - south).toBeCloseTo(0.05, 6);
     expect((west + east) / 2).toBeCloseTo(77, 6);
     expect((south + north) / 2).toBeCloseTo(34, 6);
+  });
+});
+
+describe('routeSlice', () => {
+  const route = [
+    [0, 0],
+    [0, 10],
+    [0, 30],
+  ];
+
+  it('has no slice for fewer than two points', () => {
+    expect(routeSlice([[0, 0]], 0.5)).toBeNull();
+  });
+
+  it('starts at the first point and ends on the last', () => {
+    expect(routeSlice(route, 0)?.head).toEqual([0, 0]);
+    expect(routeSlice(route, 1)).toEqual({ line: route, head: [0, 30] });
+  });
+
+  it('stops part-way inside a leg', () => {
+    const slice = routeSlice(route, 0.5);
+    expect(slice?.line).toHaveLength(3);
+    expect(slice?.head[1]).toBeCloseTo(15, 0);
+  });
+
+  it('keeps whole legs it has passed', () => {
+    const slice = routeSlice(route, 0.9);
+    expect(slice?.line[1]).toEqual([0, 10]);
+  });
+
+  it('clamps the fraction and survives a zero-length route', () => {
+    expect(routeSlice(route, 2)?.head).toEqual([0, 30]);
+    expect(routeSlice(route, -1)?.head).toEqual([0, 0]);
+    expect(
+      routeSlice(
+        [
+          [5, 5],
+          [5, 5],
+        ],
+        0.5,
+      )?.head,
+    ).toEqual([5, 5]);
   });
 });

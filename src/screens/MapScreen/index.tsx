@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useGetMapStopsQuery, type MapStopItem } from '@/api/map.api';
@@ -65,12 +65,14 @@ const ON_THIS_DAY_MAX_WIDTH = 360;
  */
 export const MapScreen = (): ReactNode => {
   const { windowClass, margin, bottomChrome } = useWindowClass();
+  const { width, height } = useWindowDimensions();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useAppDispatch();
   const { data, isError } = useGetMapStopsQuery();
   const filter = useAppSelector(selectMapFilter);
   const selectedId = useAppSelector(selectSelectedStopId);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [onThisDayClosed, setOnThisDayClosed] = useState(false);
   const fittedOnce = useRef(false);
   const compact = windowClass === 'compact';
@@ -119,12 +121,13 @@ export const MapScreen = (): ReactNode => {
   }, [isError]);
 
   // The opening view frames everything once the memories are in; an empty map keeps the world view.
+  // It waits for the map to load: a camera move sent before that is dropped, so a cold start stayed on the world view.
   // The guard makes later runs (the controller changes every render) do nothing, so the camera never jumps.
   useEffect(() => {
-    if (fittedOnce.current || allStops.length === 0) return;
+    if (fittedOnce.current || !mapLoaded || allStops.length === 0) return;
     fittedOnce.current = true;
     pins.fitToStops(allStops);
-  }, [allStops, pins]);
+  }, [allStops, mapLoaded, pins]);
 
   const handleLoadError = (): void => {
     setLoadFailed(true);
@@ -214,11 +217,7 @@ export const MapScreen = (): ReactNode => {
           ]}
           pointerEvents="box-none"
         >
-          <MapButtons
-            onFit={() => pins.fitToStops(stops)}
-            onLocate={() => void live.locate()}
-            locating={live.status === 'locating'}
-          />
+          <MapButtons onLocate={() => void live.locate()} locating={live.status === 'locating'} />
           {compact ? <Fab onPress={() => navigation.navigate(SCREENS.MemoryForm)} /> : null}
         </Animated.View>
       )}
@@ -247,6 +246,9 @@ export const MapScreen = (): ReactNode => {
       ) : null}
       {expanded ? null : (
         <MapSheet
+          // A closed sheet keeps its old closed position when the window height changes (rotation, fold,
+          // split screen) and peeks out empty; a fresh sheet starts open or closed correctly.
+          key={`${width}x${height}`}
           stop={selectedStop}
           bottomInset={compact ? TAB_CLEARANCE + space[2] : space[4]}
           onClose={() => dispatch(setSelectedStopId(null))}
@@ -262,7 +264,7 @@ export const MapScreen = (): ReactNode => {
         <View style={styles.mapArea}>
           <AtlasMap
             onLoadError={handleLoadError}
-            bottomInset={bottomChrome}
+            onLoaded={() => setMapLoaded(true)}
             mapRef={pins.mapRef}
             cameraRef={pins.cameraRef}
             onRegionDidChange={pins.handleRegionDidChange}
