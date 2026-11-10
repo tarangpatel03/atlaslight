@@ -28,6 +28,8 @@ interface AppBottomSheetProps {
   /** Dims what is behind and closes the sheet when tapped. */
   backdrop?: boolean;
   onClose?: () => void;
+  /** Space kept free under the sheet, e.g. for the floating tab bar. */
+  bottomInset?: number;
 }
 
 const HANDLE_WIDTH = 40;
@@ -52,6 +54,7 @@ export const AppBottomSheet = ({
   glass = false,
   backdrop = false,
   onClose,
+  bottomInset,
 }: AppBottomSheetProps): ReactNode => {
   const insets = useSafeAreaInsets();
   // The library's backdrop starts touchable and only turns "none" once the sheet moves (a mount race in
@@ -67,6 +70,7 @@ export const AppBottomSheet = ({
       ref={ref}
       index={index}
       snapPoints={snapPoints}
+      bottomInset={bottomInset}
       enableDynamicSizing={false}
       enablePanDownToClose
       animationConfigs={reduceMotion ? instantConfigs : springConfigs}

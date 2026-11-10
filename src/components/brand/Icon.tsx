@@ -8,7 +8,9 @@ import {
   ChevronLeft,
   Heart,
   Image,
+  LocateFixed,
   Map,
+  Maximize,
   MapPin,
   Pencil,
   Plus,
@@ -42,6 +44,8 @@ export const ICONS = {
   edit: Pencil,
   camera: Camera,
   video: Video,
+  locate: LocateFixed,
+  fit: Maximize,
 } as const satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

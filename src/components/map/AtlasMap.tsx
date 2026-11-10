@@ -53,7 +53,7 @@ export const AtlasMap = ({
     compass={false}
     logo={false}
     attribution
-    attributionPosition={{ bottom: 8 + bottomInset, right: 8 }}
+    attributionPosition={{ bottom: 8 + bottomInset, left: 8 }}
     onDidFailLoadingMap={onLoadError}
     onRegionDidChange={onRegionDidChange}
     onPress={onPress}

@@ -44,6 +44,10 @@ Visited countries and Indian states/UTs are worked out on the device from two bu
 
 Both are simplified to keep them small (about 470 KB and 85 KB). To regenerate (for example after a new Natural Earth release): download `ne_50m_admin_0_countries.geojson` and `ne_10m_admin_1_states_provinces.geojson` from the [natural-earth-vector](https://github.com/nvkelso/natural-earth-vector) repo, keep only the properties above (India = features with `iso_a2 = IN`), then run `npx mapshaper <in>.geojson -simplify 25% keep-shapes -o countries.json format=geojson precision=0.001` (15% for the India file). Nothing is downloaded by the app.
 
+## Live location
+
+Location is asked only when you tap the Locate button on the Map, and only while the app is open: the position is followed while the Map tab is showing and the GPS stops when you leave it. There is no background location, nothing is stored and nothing leaves the device. Permissions are `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION` (Android manifest) and the location text in `Info.plist`; the code is `src/services/location.service.ts`.
+
 ## Database
 
 Schema is in `src/db/schema/`. After a schema change run `yarn db:generate`, which writes a migration into `src/db/migrations/`; `DatabaseProvider` applies migrations at startup. After the first generate or a migration change, restart Metro with `yarn start --reset-cache`.

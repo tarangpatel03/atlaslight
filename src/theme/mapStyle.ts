@@ -1,3 +1,5 @@
+import type { LineLayerSpecification } from '@maplibre/maplibre-react-native';
+
 import { colors } from './colors';
 
 /**
@@ -128,10 +130,15 @@ export const visitedRegionPaint = {
   outline: { 'line-color': colors.amber, 'line-opacity': 0.4, 'line-width': 1 },
 } as const;
 
-/** Paint for journey route lines (aurora gradient along the line; needs lineMetrics on the source). */
-export const routeLinePaint = {
-  'line-width': 3,
+/** Layout for journey route lines (cap and join are layout properties, not paint). */
+export const routeLayout: NonNullable<LineLayerSpecification['layout']> = {
   'line-cap': 'round',
+  'line-join': 'round',
+};
+
+/** Paint for journey route lines (aurora gradient along the line; needs lineMetrics on the source). */
+export const routeLinePaint: NonNullable<LineLayerSpecification['paint']> = {
+  'line-width': 3,
   'line-gradient': [
     'interpolate',
     ['linear'],
@@ -141,4 +148,4 @@ export const routeLinePaint = {
     1,
     colors.auroraViolet,
   ],
-} as const;
+};

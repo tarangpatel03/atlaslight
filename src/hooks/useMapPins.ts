@@ -11,6 +11,7 @@ import { STOP_LAYERS } from '@/components/map';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectSelectedStopId, setSelectedStopId } from '@/store/slices';
 import { mapPins } from '@/theme/mapPins';
+import { stopsBounds, type MapStop } from '@/utils/mapFeatures.util';
 
 // Wait for the camera to settle before asking the map what is in view.
 const SETTLE_MS = 200;
@@ -26,13 +27,23 @@ export type MapPinsController = {
   handlePressStop: (stopId: string) => void;
   handlePressCluster: (clusterId: number, lngLat: [number, number]) => Promise<void>;
   handleMapPress: () => void;
+  /** Frames the given memories (the whole world view when there are none). */
+  fitToStops: (target: MapStop[]) => void;
+  /** Moves the camera to a point, e.g. a searched place. */
+  flyToPoint: (latitude: number, longitude: number) => void;
 };
+
+/** Room kept clear of the search bar and chips (top) and the tab bar and FAB (bottom) when framing stops. */
+export type FitPadding = { top: number; right: number; bottom: number; left: number };
+
+// A searched place or a single memory: close enough to see streets, far enough to see the area.
+const POINT_ZOOM = 11;
 
 /**
  * Selection, camera moves and the photo pins of the Map screen. Takes the stops that pass the
  * current filter; the screen owns the data query.
  */
-export const useMapPins = (stops: MapStopItem[]): MapPinsController => {
+export const useMapPins = (stops: MapStopItem[], fitPadding: FitPadding): MapPinsController => {
   const dispatch = useAppDispatch();
   const selectedId = useAppSelector(selectSelectedStopId);
 
@@ -98,6 +109,15 @@ export const useMapPins = (stops: MapStopItem[]): MapPinsController => {
     dispatch(setSelectedStopId(null));
   };
 
+  const fitToStops = (target: MapStop[]): void => {
+    const bounds = stopsBounds(target);
+    if (bounds) cameraRef.current?.fitBounds(bounds, { padding: fitPadding, duration: 600 });
+  };
+
+  const flyToPoint = (latitude: number, longitude: number): void => {
+    cameraRef.current?.easeTo({ center: [longitude, latitude], zoom: POINT_ZOOM, duration: 600 });
+  };
+
   return {
     mapRef,
     cameraRef,
@@ -108,5 +128,7 @@ export const useMapPins = (stops: MapStopItem[]): MapPinsController => {
     handlePressStop,
     handlePressCluster,
     handleMapPress,
+    fitToStops,
+    flyToPoint,
   };
 };
