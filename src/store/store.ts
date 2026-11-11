@@ -10,6 +10,7 @@ import {
   REGISTER,
   REHYDRATE,
 } from 'redux-persist';
+import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import { baseApi } from '@/api/baseApi';
 import { journeysUiReducer, mapUiReducer, settingsReducer, statsUiReducer } from './slices';
 
@@ -21,12 +22,15 @@ const rootReducer = combineReducers({
   statsUi: statsUiReducer,
 });
 
-const persistedReducer = persistReducer(
+// The explicit state type keeps autoMergeLevel2's loose typing from widening the store types.
+const persistedReducer = persistReducer<ReturnType<typeof rootReducer>>(
   {
     key: 'root',
     storage: createAsyncStorage('atlaslight'),
     // Only UI/settings slices belong here. Database data (baseApi) is never persisted.
     whitelist: ['settings'],
+    // Merge saved settings over the defaults, so keys added later (older installs saved only some) keep their default.
+    stateReconciler: autoMergeLevel2,
   },
   rootReducer,
 );

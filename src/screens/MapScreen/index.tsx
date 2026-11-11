@@ -4,6 +4,7 @@ import { useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useGetMapStopsQuery, type MapStopItem } from '@/api/map.api';
+import { useGetWishlistQuery } from '@/api/wishlist.api';
 import { Fab } from '@/components/buttons';
 import { EmptyState } from '@/components/feedback';
 import { Screen } from '@/components/layout';
@@ -20,6 +21,7 @@ import {
   StopPins,
   UserLocationPin,
   VisitedRegions,
+  WishPins,
 } from '@/components/map';
 import { useLiveLocation } from '@/hooks/useLiveLocation';
 import { useMapPins } from '@/hooks/useMapPins';
@@ -31,6 +33,9 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectMapFilter,
   selectSelectedStopId,
+  selectShowPhotoPins,
+  selectShowRoutes,
+  selectShowVisitedRegions,
   setMapFilter,
   setSelectedStopId,
 } from '@/store/slices';
@@ -55,6 +60,8 @@ const TAB_CLEARANCE = sizes.tabBarHeight + space[4];
 const TOP_CHROME = space[2] + sizes.touchMin + space[2] + sizes.touchMin;
 // On wider windows the search and chips stay a phone-sized column instead of stretching across the map.
 const MAP_CHROME_MAX_WIDTH = 420;
+// A stable empty list for hidden photo pins, so StopPins gets no new array each render.
+const NO_STOPS: MapStopItem[] = [];
 // Widest the On this day card gets on wide windows.
 const ON_THIS_DAY_MAX_WIDTH = 360;
 
@@ -71,6 +78,9 @@ export const MapScreen = (): ReactNode => {
   const { data, isError } = useGetMapStopsQuery();
   const filter = useAppSelector(selectMapFilter);
   const selectedId = useAppSelector(selectSelectedStopId);
+  const showVisitedRegions = useAppSelector(selectShowVisitedRegions);
+  const showRoutes = useAppSelector(selectShowRoutes);
+  const showPhotoPins = useAppSelector(selectShowPhotoPins);
   const [loadFailed, setLoadFailed] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [onThisDayClosed, setOnThisDayClosed] = useState(false);
@@ -78,6 +88,8 @@ export const MapScreen = (): ReactNode => {
   const compact = windowClass === 'compact';
   const expanded = windowClass === 'expanded';
 
+  const { data: wishlistData } = useGetWishlistQuery();
+  const wishlist = useMemo(() => wishlistData ?? [], [wishlistData]);
   const allStops = useMemo(() => data ?? [], [data]);
   const stops = useMemo(() => filterMapStops(allStops, filter), [allStops, filter]);
   const points = useMemo(() => stopsToPoints(stops), [stops]);
@@ -192,7 +204,9 @@ export const MapScreen = (): ReactNode => {
             filter={filter}
             journeys={journeys}
             gutter={margin}
+            wishCount={wishlist.length}
             onChange={changeFilter}
+            onOpenWishlist={() => navigation.navigate(SCREENS.Wishlist)}
           />
         )}
         {live.status === 'denied' || live.status === 'unavailable' ? (
@@ -270,11 +284,12 @@ export const MapScreen = (): ReactNode => {
             onRegionDidChange={pins.handleRegionDidChange}
             onPress={pins.handleMapPress}
           >
-            <VisitedRegions regions={regions} />
-            <RouteLines routes={routes} />
+            {showVisitedRegions ? <VisitedRegions regions={regions} /> : null}
+            {showRoutes ? <RouteLines routes={routes} /> : null}
+            <WishPins entries={wishlist} />
             <StopPins
               points={points}
-              photoStops={pins.photoStops}
+              photoStops={showPhotoPins ? pins.photoStops : NO_STOPS}
               selectedId={pins.selectedId}
               sourceRef={pins.sourceRef}
               onPressStop={pins.handlePressStop}

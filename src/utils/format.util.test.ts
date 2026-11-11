@@ -1,4 +1,6 @@
 import {
+  formatBytes,
+  formatList,
   formatCount,
   formatDate,
   formatEarthProgress,
@@ -119,5 +121,32 @@ describe('formatEarthProgress', () => {
   it('counts laps from one up', () => {
     expect(formatEarthProgress(1)).toBe('1.0 times around the Earth');
     expect(formatEarthProgress(2.34)).toBe('2.3 times around the Earth');
+  });
+});
+
+describe('formatBytes', () => {
+  it('shows bytes below 1 KB', () => {
+    expect(formatBytes(0)).toBe('0 B');
+    expect(formatBytes(1023)).toBe('1023 B');
+  });
+
+  it('rounds KB to whole numbers', () => {
+    expect(formatBytes(1024)).toBe('1 KB');
+    expect(formatBytes(862_000)).toBe('842 KB');
+  });
+
+  it('shows one decimal from MB up', () => {
+    expect(formatBytes(13_002_342)).toBe('12.4 MB');
+    expect(formatBytes(1.2 * 1024 ** 3)).toBe('1.2 GB');
+  });
+});
+
+describe('formatList', () => {
+  it('joins one, two and three parts', () => {
+    expect(formatList(['7 journeys'])).toBe('7 journeys');
+    expect(formatList(['7 journeys', '31 memories'])).toBe('7 journeys and 31 memories');
+    expect(formatList(['7 journeys', '31 memories', '32 photos'])).toBe(
+      '7 journeys, 31 memories and 32 photos',
+    );
   });
 });

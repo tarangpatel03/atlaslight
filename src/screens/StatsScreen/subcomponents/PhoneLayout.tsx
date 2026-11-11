@@ -7,6 +7,7 @@ import { ScratchMapCard } from './ScratchMapCard';
 import { StatsHeader } from './StatsHeader';
 import type { StatsBodyProps } from './statsBody.types';
 import { StatTiles } from './StatTiles';
+import { WishlistCard } from './WishlistCard';
 import { YearFilter } from './YearFilter';
 import { YearsCard } from './YearsCard';
 
@@ -49,6 +50,7 @@ export const PhoneLayout = ({
       width={Math.min(width, COLUMN_MAX_WIDTH)}
     />
     <YearsCard data={stats.journeysPerYear} highlightYear={highlightYear} />
+    <WishlistCard />
   </View>
 );
 

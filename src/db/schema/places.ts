@@ -2,8 +2,9 @@ import { index, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 import { createdAt, id } from '../columns';
 
-export const PLACE_SOURCES = ['photon', 'manual', 'exif'] as const;
-export type PlaceSource = (typeof PLACE_SOURCES)[number];
+import { PLACE_SOURCES } from '../enums';
+
+export { PLACE_SOURCES, type PlaceSource } from '../enums';
 
 // Reverse-geocode cache: each location is looked up once, then shared by stops and wishlist.
 export const places = sqliteTable(
@@ -22,7 +23,7 @@ export const places = sqliteTable(
     source: text('source', { enum: PLACE_SOURCES }).notNull(),
     createdAt: createdAt(),
   },
-  table => [
+  (table) => [
     index('places_region_idx').on(table.countryCode, table.adminArea),
     index('places_coords_idx').on(table.latitude, table.longitude),
   ],

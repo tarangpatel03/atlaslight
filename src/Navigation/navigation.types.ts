@@ -19,5 +19,6 @@ export type RootStackParamList = {
     | undefined;
   /** Where the map opens: the memory's current point, else the journey's memories, else the world. */
   [SCREENS.MapPick]: { latitude?: number; longitude?: number; journeyId?: string };
+  [SCREENS.Wishlist]: undefined;
   [SCREENS.Kit]: undefined;
 };

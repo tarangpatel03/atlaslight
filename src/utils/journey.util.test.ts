@@ -3,6 +3,7 @@ import { JOURNEY_COLORS } from '@/theme/colors';
 import {
   buildJourneyListRows,
   filterJourneys,
+  formatDeleteAllSummary,
   formatDeletionSummary,
   groupJourneysByYear,
   journeysCaption,
@@ -25,8 +26,8 @@ describe('groupJourneysByYear', () => {
     const b = { id: 'b', startDate: day(2025, 1, 1), endDate: day(2025, 1, 4) };
     const c = { id: 'c', startDate: day(2025, 8, 1), endDate: day(2025, 8, 4) };
     const groups = groupJourneysByYear([a, b, c]);
-    expect(groups.map(g => g.year)).toEqual([2025, 2024]);
-    expect(groups[0].items.map(i => i.id)).toEqual(['c', 'b']);
+    expect(groups.map((g) => g.year)).toEqual([2025, 2024]);
+    expect(groups[0].items.map((i) => i.id)).toEqual(['c', 'b']);
   });
 
   it('returns nothing for no journeys', () => {
@@ -102,15 +103,15 @@ describe('filterJourneys', () => {
   });
 
   it('keeps only the ongoing journey', () => {
-    expect(filterJourneys(sample, 'ongoing').map(j => j.id)).toEqual(['live']);
+    expect(filterJourneys(sample, 'ongoing').map((j) => j.id)).toEqual(['live']);
   });
 
   it('keeps favourites', () => {
-    expect(filterJourneys(sample, 'favourites').map(j => j.id)).toEqual(['a', 'c']);
+    expect(filterJourneys(sample, 'favourites').map((j) => j.id)).toEqual(['a', 'c']);
   });
 
   it('keeps one start year', () => {
-    expect(filterJourneys(sample, 2025).map(j => j.id)).toEqual(['b', 'c']);
+    expect(filterJourneys(sample, 2025).map((j) => j.id)).toEqual(['b', 'c']);
   });
 
   it('can end up empty', () => {
@@ -135,7 +136,7 @@ describe('journeysCaption', () => {
 describe('buildJourneyListRows', () => {
   it('puts the ongoing journey first as a hero, then rows under year headers', () => {
     const rows = buildJourneyListRows(sample);
-    expect(rows.map(r => r.key)).toEqual([
+    expect(rows.map((r) => r.key)).toEqual([
       'header-ongoing',
       'hero-live',
       'header-2026',
@@ -149,7 +150,7 @@ describe('buildJourneyListRows', () => {
   });
 
   it('counts the journeys under each year header', () => {
-    const header = buildJourneyListRows(sample).find(r => r.key === 'header-2025');
+    const header = buildJourneyListRows(sample).find((r) => r.key === 'header-2025');
     expect(header).toMatchObject({ label: '2025', count: 2 });
   });
 
@@ -166,17 +167,17 @@ describe('buildJourneyListRows', () => {
 describe('orderJourneysForGrid', () => {
   it('puts the ongoing journey first, then newest first', () => {
     const shuffled = [sample[3], sample[1], sample[0], sample[4], sample[2]];
-    expect(orderJourneysForGrid(shuffled).map(j => j.id)).toEqual(['live', 'a', 'c', 'b', 'd']);
+    expect(orderJourneysForGrid(shuffled).map((j) => j.id)).toEqual(['live', 'a', 'c', 'b', 'd']);
   });
 
   it('keeps plain newest-first order without an ongoing journey', () => {
-    expect(orderJourneysForGrid(sample.slice(1)).map(j => j.id)).toEqual(['a', 'c', 'b', 'd']);
+    expect(orderJourneysForGrid(sample.slice(1)).map((j) => j.id)).toEqual(['a', 'c', 'b', 'd']);
   });
 
   it('does not change the list it is given', () => {
     const input = [sample[4], sample[1]];
     orderJourneysForGrid(input);
-    expect(input.map(j => j.id)).toEqual(['d', 'a']);
+    expect(input.map((j) => j.id)).toEqual(['d', 'a']);
   });
 });
 
@@ -195,7 +196,9 @@ describe('toJourneyInput', () => {
   });
 
   it('turns a blank or missing description into null and keeps an ongoing end date', () => {
-    expect(toJourneyInput({ title: 'Goa', description: '', startDate: 1, endDate: null }).description).toBeNull();
+    expect(
+      toJourneyInput({ title: 'Goa', description: '', startDate: 1, endDate: null }).description,
+    ).toBeNull();
     expect(toJourneyInput({ title: 'Goa', startDate: 1, endDate: null }).description).toBeNull();
   });
 });
@@ -210,6 +213,24 @@ describe('formatDeletionSummary', () => {
   it('adds videos only when there are some', () => {
     expect(formatDeletionSummary({ stopCount: 1, photoCount: 1, videoCount: 2 })).toBe(
       'Deletes 1 memory, 1 photo and 2 videos from this phone.',
+    );
+  });
+});
+
+describe('formatDeleteAllSummary', () => {
+  it('names journeys, memories and photos and says settings stay', () => {
+    expect(
+      formatDeleteAllSummary({ journeyCount: 7, stopCount: 31, photoCount: 32, videoCount: 0 }),
+    ).toBe(
+      'Deletes 7 journeys, 31 memories and 32 photos from this phone. Your settings stay. This cannot be undone.',
+    );
+  });
+
+  it('adds videos only when there are some', () => {
+    expect(
+      formatDeleteAllSummary({ journeyCount: 1, stopCount: 2, photoCount: 1, videoCount: 3 }),
+    ).toBe(
+      'Deletes 1 journey, 2 memories, 1 photo and 3 videos from this phone. Your settings stay. This cannot be undone.',
     );
   });
 });

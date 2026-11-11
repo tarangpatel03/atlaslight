@@ -7,6 +7,7 @@ export * from './statsBody.types';
 export * from './StatsSkeleton';
 export * from './StatTiles';
 export * from './WideLayout';
+export * from './WishlistCard';
 export * from './WideScratchMap';
 export * from './YearFilter';
 export * from './YearsCard';

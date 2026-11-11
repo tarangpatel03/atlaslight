@@ -1,5 +1,12 @@
 import ImageResizer from '@bam.tech/react-native-image-resizer';
-import { copyFile, DocumentDirectoryPath, exists, mkdir, moveFile, unlink } from '@dr.pogodin/react-native-fs';
+import {
+  copyFile,
+  DocumentDirectoryPath,
+  exists,
+  mkdir,
+  moveFile,
+  unlink,
+} from '@dr.pogodin/react-native-fs';
 import { createThumbnail } from 'react-native-create-thumbnail';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -35,7 +42,8 @@ export type StoredMedia = {
 const stripScheme = (p: string): string => p.replace(/^file:\/\//, '');
 
 /** Relative DB path → absolute file path. */
-export const toAbsolute = (relativePath: string): string => `${DocumentDirectoryPath}/${relativePath}`;
+export const toAbsolute = (relativePath: string): string =>
+  `${DocumentDirectoryPath}/${relativePath}`;
 
 /** Relative DB path → URI for <Image source={{ uri }}> / FastImage / react-native-video. */
 export const mediaUri = (relativePath: string | null | undefined): string | undefined =>
@@ -62,8 +70,18 @@ const makeThumbnail = async (
   const thumbAbs = toAbsolute(thumbRel);
 
   if (item.type === 'video') {
-    const thumb = await createThumbnail({ url: `file://${sourceAbs}`, timeStamp: 1000, format: 'jpeg' });
-    const resized = await ImageResizer.createResizedImage(thumb.path, THUMB_SIZE, THUMB_SIZE, 'JPEG', THUMB_QUALITY);
+    const thumb = await createThumbnail({
+      url: `file://${sourceAbs}`,
+      timeStamp: 1000,
+      format: 'jpeg',
+    });
+    const resized = await ImageResizer.createResizedImage(
+      thumb.path,
+      THUMB_SIZE,
+      THUMB_SIZE,
+      'JPEG',
+      THUMB_QUALITY,
+    );
     await moveFile(stripScheme(resized.path ?? resized.uri), thumbAbs);
   } else {
     const resized = await ImageResizer.createResizedImage(
@@ -93,8 +111,15 @@ const safeUnlink = async (relativePath: string | null | undefined): Promise<void
 };
 
 /** Removes the files of the given media rows (call AFTER the rows are deleted). */
-export const deleteMediaFiles = async (items: Pick<StoredMedia, 'filePath' | 'thumbnailPath'>[]): Promise<void> => {
-  await Promise.all(items.flatMap(m => [safeUnlink(m.filePath), safeUnlink(m.thumbnailPath)]));
+export const deleteMediaFiles = async (
+  items: Pick<StoredMedia, 'filePath' | 'thumbnailPath'>[],
+): Promise<void> => {
+  await Promise.all(items.flatMap((m) => [safeUnlink(m.filePath), safeUnlink(m.thumbnailPath)]));
+};
+
+/** Removes every media file and thumbnail (call AFTER all rows are deleted). */
+export const deleteAllMediaFiles = async (): Promise<void> => {
+  await Promise.all([safeUnlink('media'), safeUnlink('thumbs')]);
 };
 
 /** Removes every file of a journey (call AFTER the journey row is deleted). */
@@ -143,7 +168,10 @@ export const importMedia = async (item: PickedMedia, journeyId: string): Promise
  * If any copy fails, the files already copied are removed and the error is rethrown,
  * so a failed save never leaves orphans on disk.
  */
-export const importMediaBatch = async (items: PickedMedia[], journeyId: string): Promise<StoredMedia[]> => {
+export const importMediaBatch = async (
+  items: PickedMedia[],
+  journeyId: string,
+): Promise<StoredMedia[]> => {
   const done: StoredMedia[] = [];
   try {
     for (const item of items) {

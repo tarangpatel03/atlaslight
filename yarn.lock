@@ -2236,6 +2236,11 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/geolocation/-/geolocation-3.4.0.tgz#8b6ee024a71cf94526ab796af1e9ae140684802c"
   integrity sha512-bzZH89/cwmpkPMKKveoC72C4JH0yF4St5Ceg/ZM9pA1SqX9MlRIrIrrOGZ/+yi++xAvFDiYfihtn9TvXWU9/rA==
 
+"@react-native-documents/picker@^12.0.3":
+  version "12.0.3"
+  resolved "https://registry.yarnpkg.com/@react-native-documents/picker/-/picker-12.0.3.tgz#bf712b5466a285a3450061d5ad39d4018d62fdc0"
+  integrity sha512-uRSJkS8UKPwiaBUAyJGeDBMKaseKGbHqQb5PhUsrNFMA2/fV+JG5HBohtPhKiIhLaKDQ1vdpEGza0aDxrj49NA==
+
 "@react-native/asset-utils@0.88.1":
   version "0.88.1"
   resolved "https://registry.yarnpkg.com/@react-native/asset-utils/-/asset-utils-0.88.1.tgz#b830a8914dda0c445dae929a23ed053cbe137115"
@@ -6185,6 +6190,11 @@ react-native-worklets@^0.13.1:
     convert-source-map "^2.0.0"
     semver "^7.7.4"
     whatwg-fetch "^3.6.20"
+
+react-native-zip-archive@^9.5.3:
+  version "9.5.3"
+  resolved "https://registry.yarnpkg.com/react-native-zip-archive/-/react-native-zip-archive-9.5.3.tgz#4caa959cd57e8b535a5988877abc125a78a108ae"
+  integrity sha512-Iy1NBsFg7ng5TrQJrRjqjvQekLLvSuhkLR16EOAU2eUctItL+wakQi3l2D82na8CpezhylYhtjwJE9sywREkTw==
 
 react-native@0.88.1:
   version "0.88.1"

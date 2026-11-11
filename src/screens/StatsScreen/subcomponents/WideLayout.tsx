@@ -7,6 +7,7 @@ import { StatsHeader } from './StatsHeader';
 import type { StatsBodyProps } from './statsBody.types';
 import { StatTiles } from './StatTiles';
 import { WideScratchMap } from './WideScratchMap';
+import { WishlistCard } from './WishlistCard';
 import { YearFilter } from './YearFilter';
 import { YearsCard } from './YearsCard';
 
@@ -58,6 +59,7 @@ export const WideLayout = ({
         <YearsCard compact data={stats.journeysPerYear} highlightYear={highlightYear} />
       </View>
     </View>
+    <WishlistCard />
   </View>
 );
 

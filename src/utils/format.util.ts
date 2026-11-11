@@ -77,6 +77,12 @@ export const formatDateRange = (startMs: number, endMs: number | null): string =
 export const formatShortYear = (year: number): string =>
   `’${String(year % 100).padStart(2, '0')}`;
 
+/** `7 journeys`, `7 journeys and 31 memories`, `7 journeys, 31 memories and 32 photos`; the parts must not be empty. */
+export const formatList = (parts: string[]): string => {
+  const last = parts[parts.length - 1];
+  return parts.length === 1 ? last : `${parts.slice(0, -1).join(', ')} and ${last}`;
+};
+
 /** `1 memory`, `6 memories`. */
 export const formatCount = (count: number, singular: string, plural: string): string =>
   `${count} ${count === 1 ? singular : plural}`;
@@ -104,4 +110,12 @@ export const formatTime = (ms: number): string => {
 export const formatShortDateTime = (ms: number): string => {
   const date = new Date(ms);
   return `${date.getDate()} ${MONTHS[date.getMonth()]} · ${formatTime(ms)}`;
+};
+
+/** `0 B`, `842 KB`, `12.4 MB` or `1.2 GB`: whole numbers up to KB, one decimal from MB. */
+export const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 ** 2) return `${Math.round(bytes / 1024)} KB`;
+  if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+  return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
 };

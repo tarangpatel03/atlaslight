@@ -16,6 +16,8 @@ export const SCREENS = {
   MemoryForm: 'MemoryForm',
   /** Full screen map with a fixed centre mark: pan the map, then use that spot as a memory's location. */
   MapPick: 'MapPick',
+  /** Places to visit: add a place, remove one. A full screen on phones, a right-hand panel on wider windows. */
+  Wishlist: 'Wishlist',
   /** Dev-only component gallery; registered only in `__DEV__`. */
   Kit: 'Kit',
 } as const;

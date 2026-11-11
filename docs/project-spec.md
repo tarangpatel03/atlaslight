@@ -32,8 +32,8 @@ notes, moods) to places, and watch one dark world map fill with amber pins and a
 7. Stats: distance, countries, journeys per year, highest point, scratch map (world only in v1).
 8. Wishlist: places to visit, shown as violet pins.
 9. On this day: a memory from the same date in a past year, on the map screen.
-10. Settings: backup export/import (.zip), suggest trips from photos toggle, map toggles, units,
-    permissions shortcuts, **Load demo journeys**, delete all.
+10. Settings: display name, distance units, map toggles, permissions shortcuts, data sizes, backup
+    export/import (.zip), **Load demo journeys**, delete all.
 11. Phone and tablet layouts (section 6), portrait and landscape, foldables, split screen.
 
 ### Later (not v1)
@@ -131,8 +131,8 @@ Layout comes from `useWindowClass`: **compact** (< 600) = phone, **medium/expand
 | Add / edit memory                   | full screen form: journey selector, photo strip (first = cover), Found in your photos, title, location, date, time, mood, note, Save | centred dialog over the current screen                          | picked media, places search                                                |
 | New / edit journey                  | form: title, description, start/end (ongoing toggle), cover                                                                          | dialog                                                          | —                                                                          |
 | Stats                               | headline, distance + Earth progress, tiles, scratch map, journeys per year                                                          | 2-column dashboard                                              | computed                                                                   |
-| Settings                            | profile, backup & data, map, permissions, feel, about (Load demo journeys, source link, version), Delete all                         | in the side panel / centred column                              | settings slice, DB size                                                    |
-| Wishlist (from map chip / settings) | list + add place                                                                                                                     | side panel                                                      | wishlist + places                                                          |
+| Settings                            | profile, units, map (toggles, Wishlist row), permissions, data sizes, backup (back up, restore), about (Load demo journeys, source link, version), Delete all                         | centred column (640 dp)                              | settings slice, DB size                                                    |
+| Wishlist (from map chip / settings) | full screen: search to add a place, list with remove                                                                                | side panel                                                      | wishlist + places                                                          |
 
 Visual reference: the approved Atlaslight phone and tablet designs (see design-brief.md). Match them.
 

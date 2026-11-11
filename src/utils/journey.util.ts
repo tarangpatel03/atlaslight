@@ -1,7 +1,7 @@
 import { differenceInCalendarDays } from 'date-fns';
 
 import { JOURNEY_COLORS, type JourneyColor } from '@/theme/colors';
-import { formatCount } from '@/utils/format.util';
+import { formatCount, formatList } from '@/utils/format.util';
 import type { JourneyFormValues } from '@/utils/validation.util';
 
 type Dated = { startDate: number; endDate: number | null };
@@ -20,7 +20,7 @@ export const groupJourneysByYear = <T extends Dated>(items: T[]): YearGroup<T>[]
 
 /** The journey still in progress (no end date), if any. The rules allow at most one. */
 export const pickOngoing = <T extends Dated>(items: T[]): T | null =>
-  items.find(item => item.endDate === null) ?? null;
+  items.find((item) => item.endDate === null) ?? null;
 
 /** Inclusive number of days of a trip; an ongoing trip counts up to `now`. */
 export const tripDays = (startMs: number, endMs: number | null, now: number = Date.now()): number =>
@@ -28,7 +28,7 @@ export const tripDays = (startMs: number, endMs: number | null, now: number = Da
 
 /** Next accent colour: the least-used one in the palette, ties broken by palette order. */
 export const nextJourneyColor = (usedColors: string[]): JourneyColor => {
-  const uses = (color: string): number => usedColors.filter(used => used === color).length;
+  const uses = (color: string): number => usedColors.filter((used) => used === color).length;
   return JOURNEY_COLORS.reduce((best, color) => (uses(color) < uses(best) ? color : best));
 };
 
@@ -39,19 +39,19 @@ type Listed = Dated & { id: string; isFavorite: boolean };
 
 /** Distinct start years, newest first (one filter chip each). */
 export const journeyYears = (items: Dated[]): number[] =>
-  [...new Set(items.map(item => new Date(item.startDate).getFullYear()))].sort((a, b) => b - a);
+  [...new Set(items.map((item) => new Date(item.startDate).getFullYear()))].sort((a, b) => b - a);
 
 export const filterJourneys = <T extends Listed>(items: T[], filter: JourneyFilter): T[] => {
   if (filter === 'all') return items;
-  if (filter === 'ongoing') return items.filter(item => item.endDate === null);
-  if (filter === 'favourites') return items.filter(item => item.isFavorite);
-  return items.filter(item => new Date(item.startDate).getFullYear() === filter);
+  if (filter === 'ongoing') return items.filter((item) => item.endDate === null);
+  if (filter === 'favourites') return items.filter((item) => item.isFavorite);
+  return items.filter((item) => new Date(item.startDate).getFullYear() === filter);
 };
 
 /** `7 journeys · since 2024`; empty when there are none. */
 export const journeysCaption = (items: Dated[]): string => {
   if (items.length === 0) return '';
-  const since = Math.min(...items.map(item => new Date(item.startDate).getFullYear()));
+  const since = Math.min(...items.map((item) => new Date(item.startDate).getFullYear()));
   return `${formatCount(items.length, 'journey', 'journeys')} · since ${since}`;
 };
 
@@ -68,9 +68,15 @@ export const buildJourneyListRows = <T extends Listed>(items: T[]): JourneyListR
     rows.push({ kind: 'header', key: 'header-ongoing', label: 'Ongoing', count: null });
     rows.push({ kind: 'hero', key: `hero-${ongoing.id}`, journey: ongoing });
   }
-  for (const group of groupJourneysByYear(items.filter(item => item !== ongoing))) {
-    rows.push({ kind: 'header', key: `header-${group.year}`, label: String(group.year), count: group.items.length });
-    for (const journey of group.items) rows.push({ kind: 'row', key: `row-${journey.id}`, journey });
+  for (const group of groupJourneysByYear(items.filter((item) => item !== ongoing))) {
+    rows.push({
+      kind: 'header',
+      key: `header-${group.year}`,
+      label: String(group.year),
+      count: group.items.length,
+    });
+    for (const journey of group.items)
+      rows.push({ kind: 'row', key: `row-${journey.id}`, journey });
   }
   return rows;
 };
@@ -78,7 +84,7 @@ export const buildJourneyListRows = <T extends Listed>(items: T[]): JourneyListR
 /** Order for the card grid: the ongoing journey first, then newest start date first. */
 export const orderJourneysForGrid = <T extends Dated>(items: T[]): T[] => {
   const ongoing = pickOngoing(items);
-  const rest = items.filter(item => item !== ongoing).sort((a, b) => b.startDate - a.startDate);
+  const rest = items.filter((item) => item !== ongoing).sort((a, b) => b.startDate - a.startDate);
   return ongoing ? [ongoing, ...rest] : rest;
 };
 
@@ -109,7 +115,21 @@ export const formatDeletionSummary = (counts: {
     formatCount(counts.photoCount, 'photo', 'photos'),
   ];
   if (counts.videoCount > 0) parts.push(formatCount(counts.videoCount, 'video', 'videos'));
-  const last = parts[parts.length - 1];
-  const list = parts.length === 1 ? last : `${parts.slice(0, -1).join(', ')} and ${last}`;
-  return `Deletes ${list} from this phone.`;
+  return `Deletes ${formatList(parts)} from this phone.`;
+};
+
+/** `Deletes 7 journeys, 31 memories and 32 photos from this phone. Your settings stay. This cannot be undone.` */
+export const formatDeleteAllSummary = (counts: {
+  journeyCount: number;
+  stopCount: number;
+  photoCount: number;
+  videoCount: number;
+}): string => {
+  const parts = [
+    formatCount(counts.journeyCount, 'journey', 'journeys'),
+    formatCount(counts.stopCount, 'memory', 'memories'),
+    formatCount(counts.photoCount, 'photo', 'photos'),
+  ];
+  if (counts.videoCount > 0) parts.push(formatCount(counts.videoCount, 'video', 'videos'));
+  return `Deletes ${formatList(parts)} from this phone. Your settings stay. This cannot be undone.`;
 };

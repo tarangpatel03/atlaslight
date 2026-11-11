@@ -1,4 +1,7 @@
-import type { CircleLayerSpecification, SymbolLayerSpecification } from '@maplibre/maplibre-react-native';
+import type {
+  CircleLayerSpecification,
+  SymbolLayerSpecification,
+} from '@maplibre/maplibre-react-native';
 
 import { colors } from './colors';
 
@@ -29,7 +32,23 @@ export const mapPinPaint: {
   clusterCount: SymbolPaint;
   dot: CirclePaint;
   selected: CirclePaint;
+  wish: CirclePaint;
 } = {
+  // Violet = want to go, so it never reads as a memory; a hollow ring with a dark fill, like the wish MapPin.
+  wish: {
+    'circle-color': colors.surface,
+    'circle-stroke-color': colors.auroraViolet,
+    'circle-stroke-width': 2.5,
+    'circle-radius': [
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      2,
+      mapPins.dotRadius[0] + 1,
+      12,
+      mapPins.dotRadius[1] + 1,
+    ],
+  },
   cluster: {
     'circle-color': colors.amber,
     'circle-stroke-color': colors.bg,

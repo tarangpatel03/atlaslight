@@ -13,6 +13,7 @@ import { MapPickScreen } from '@/screens/MapPickScreen';
 import { MemoryDetailScreen } from '@/screens/MemoryDetailScreen';
 import { MemoryFormScreen } from '@/screens/MemoryFormScreen';
 import { KitScreen } from '@/screens/KitScreen';
+import { WishlistScreen } from '@/screens/WishlistScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -39,6 +40,7 @@ export const RootNavigator = (): ReactNode => {
       />
       <Stack.Screen name={SCREENS.MemoryForm} component={MemoryFormScreen} options={formOptions} />
       <Stack.Screen name={SCREENS.MapPick} component={MapPickScreen} />
+      <Stack.Screen name={SCREENS.Wishlist} component={WishlistScreen} options={formOptions} />
       {__DEV__ ? <Stack.Screen name={SCREENS.Kit} component={KitScreen} /> : null}
     </Stack.Navigator>
   );

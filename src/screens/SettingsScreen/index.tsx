@@ -1,52 +1,84 @@
-import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import type { ReactNode } from 'react';
-import { View } from 'react-native';
-import { useLoadDemoJourneysMutation } from '@/api/demo.api';
-import { AppButton } from '@/components/buttons';
-import { EmptyState } from '@/components/feedback';
+import { useEffect, useRef, type ReactNode } from 'react';
+import { ScrollView, View } from 'react-native';
 import { Screen } from '@/components/layout';
-import { SCREENS } from '@/Navigation/routes';
-import type { RootStackParamList } from '@/Navigation/navigation.types';
-import { formatCount } from '@/utils/format.util';
-import { showToast } from '@/utils/toast.util';
+import type { AppBottomSheetRef } from '@/components/surfaces';
+import { useBackupRestore } from '@/hooks/useBackupRestore';
+import { useDeviceStatus } from '@/hooks/useDeviceStatus';
+import { useWindowClass } from '@/hooks/useWindowClass';
+import { sizes as layoutSizes, space } from '@/theme/layout';
+import {
+  AboutSection,
+  BackupSection,
+  DataSection,
+  DeleteAllSection,
+  DeleteAllSheet,
+  MapSection,
+  PermissionsSection,
+  ProfileSection,
+  RestoreSheet,
+  UnitsSection,
+} from './subcomponents';
 import { styles } from './style';
 
-/** Placeholder until settings arrive (Phase 6). Holds Load demo journeys; dev builds also open the UI kit. */
-export const SettingsScreen = (): ReactNode => {
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [loadDemoJourneys, { isLoading }] = useLoadDemoJourneysMutation();
+// The floating phone tab bar and the gap above it; a sheet rests above them.
+const TAB_CLEARANCE = layoutSizes.tabBarHeight + space[4];
 
-  const onLoadDemo = async (): Promise<void> => {
-    try {
-      const { added } = await loadDemoJourneys().unwrap();
-      if (added > 0)
-        showToast.success(`${formatCount(added, 'demo journey', 'demo journeys')} added.`);
-      else showToast.info('Demo journeys are already here.');
-    } catch (e) {
-      const message =
-        typeof e === 'object' && e !== null && 'message' in e ? String(e.message) : undefined;
-      showToast.error("Couldn't load the demo journeys", message);
-    }
-  };
+/** Settings tab: profile, distance units, map layers, permissions, data sizes, about and Delete all. */
+export const SettingsScreen = (): ReactNode => {
+  const { windowClass, margin, bottomChrome } = useWindowClass();
+  const { sizes, permissions, sizesFailed, reloadSizes } = useDeviceStatus();
+  const deleteSheet = useRef<AppBottomSheetRef>(null);
+  const restoreSheet = useRef<AppBottomSheetRef>(null);
+  const restore = useBackupRestore(reloadSizes);
+  const hasPending = restore.pending !== null;
+  const sheetInset = windowClass === 'compact' ? TAB_CLEARANCE + space[2] : space[4];
+
+  // The restore sheet opens once a backup has passed its checks and closes when it is settled.
+  useEffect(() => {
+    if (hasPending) restoreSheet.current?.snapToIndex(0);
+    else restoreSheet.current?.close();
+  }, [hasPending]);
 
   return (
-    <Screen>
-      <View style={styles.root}>
-        <EmptyState title="Settings" message="Units, map options and backup will live here." />
-        <AppButton
-          label="Load demo journeys"
-          variant="secondary"
-          loading={isLoading}
-          onPress={onLoadDemo}
-        />
-        {__DEV__ ? (
-          <AppButton
-            label="Open UI kit"
-            variant="secondary"
-            onPress={() => navigation.navigate(SCREENS.Kit)}
+    <Screen padded={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={[
+          styles.scroll,
+          styles.content,
+          { paddingHorizontal: margin, paddingBottom: bottomChrome },
+        ]}
+      >
+        <View style={styles.column}>
+          <ProfileSection />
+          <UnitsSection />
+          <MapSection />
+          <PermissionsSection status={permissions} />
+          <DataSection sizes={sizes} failed={sizesFailed} />
+          <BackupSection
+            restoreStatus={restore.status}
+            restoreProgress={restore.progress}
+            onRestore={() => void restore.pick()}
           />
-        ) : null}
-      </View>
+          <AboutSection />
+          <DeleteAllSection onAsk={() => deleteSheet.current?.snapToIndex(0)} />
+        </View>
+      </ScrollView>
+      <RestoreSheet
+        ref={restoreSheet}
+        message={restore.pending ?? ''}
+        loading={restore.status === 'restoring'}
+        bottomInset={sheetInset}
+        onConfirm={() => void restore.confirm()}
+        onCancel={() => void restore.cancel()}
+      />
+      <DeleteAllSheet
+        ref={deleteSheet}
+        bottomInset={sheetInset}
+        onDeleted={reloadSizes}
+        onClose={() => deleteSheet.current?.close()}
+      />
     </Screen>
   );
 };

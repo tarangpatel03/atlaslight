@@ -13,3 +13,4 @@ export * from './RouteLines';
 export * from './StopPins';
 export * from './UserLocationPin';
 export * from './VisitedRegions';
+export * from './WishPins';

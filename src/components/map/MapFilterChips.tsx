@@ -10,15 +10,20 @@ interface MapFilterChipsProps {
   journeys: { id: string; title: string }[];
   /** Space kept on the left and right of the row, so it lines up with the search bar. */
   gutter: number;
+  /** How many places are on the wishlist. */
+  wishCount: number;
   onChange: (filter: MapFilter) => void;
+  onOpenWishlist: () => void;
 }
 
-/** Filter chips over the map: All, Ongoing, Favourites, then one per journey. */
+/** Chips over the map: All, Ongoing, Favourites filters, the Wishlist shortcut, then one filter per journey. */
 export const MapFilterChips = ({
   filter,
   journeys,
   gutter,
+  wishCount,
   onChange,
+  onOpenWishlist,
 }: MapFilterChipsProps): ReactNode => (
   <ScrollView
     horizontal
@@ -39,6 +44,11 @@ export const MapFilterChips = ({
       icon="heart"
       selected={filter.kind === 'favourites'}
       onPress={() => onChange({ kind: 'favourites' })}
+    />
+    <Chip
+      label={wishCount > 0 ? `Wishlist · ${wishCount}` : 'Wishlist'}
+      variant="wish"
+      onPress={onOpenWishlist}
     />
     {journeys.map((journey) => (
       <Chip

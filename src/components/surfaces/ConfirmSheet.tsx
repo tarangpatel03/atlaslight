@@ -16,6 +16,10 @@ interface ConfirmSheetProps {
   destructive?: boolean;
   /** Keeps the confirm button busy while the work runs. */
   loading?: boolean;
+  /** Space kept free under the sheet, e.g. for the floating tab bar. */
+  bottomInset?: number;
+  /** Sheet height in dp when the default does not fit a longer message. */
+  height?: number;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -28,10 +32,18 @@ export const ConfirmSheet = ({
   confirmLabel,
   destructive = false,
   loading = false,
+  bottomInset,
+  height = 280,
   onConfirm,
   onCancel,
 }: ConfirmSheetProps): ReactNode => (
-  <AppBottomSheet ref={ref} snapPoints={[280]} backdrop onClose={onCancel}>
+  <AppBottomSheet
+    ref={ref}
+    snapPoints={[height]}
+    bottomInset={bottomInset}
+    backdrop
+    onClose={onCancel}
+  >
     <View style={styles.text}>
       <AppText variant="title">{title}</AppText>
       <AppText variant="body" color={colors.inkMuted}>

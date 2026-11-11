@@ -3,8 +3,9 @@ import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-or
 import { createdAt, id } from '../columns';
 import { stops } from './stops';
 
-export const MEDIA_TYPES = ['photo', 'video'] as const;
-export type MediaType = (typeof MEDIA_TYPES)[number];
+import { MEDIA_TYPES } from '../enums';
+
+export { MEDIA_TYPES, type MediaType } from '../enums';
 
 export const media = sqliteTable(
   'media',
@@ -31,7 +32,7 @@ export const media = sqliteTable(
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: createdAt(),
   },
-  table => [
+  (table) => [
     index('media_stop_idx').on(table.stopId, table.sortOrder),
     uniqueIndex('media_source_asset_uq').on(table.sourceAssetId),
   ],
