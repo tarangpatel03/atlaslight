@@ -1,8 +1,9 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <!-- Base application theme. The window background is the launch screen (dark, with the icon). -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowBackground">#F9FAFB</item>
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     </style>
 

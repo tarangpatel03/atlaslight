@@ -1,7 +1,11 @@
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import type { ReactNode } from 'react';
 import { Linking } from 'react-native';
-import { useLoadDemoJourneysMutation } from '@/api/demo.api';
+import {
+  useLoadDemoJourneysMutation,
+  useLoadTestMemoriesMutation,
+  useRemoveTestMemoriesMutation,
+} from '@/api/demo.api';
 import { AppText } from '@/components/brand';
 import { AppButton } from '@/components/buttons';
 import { SCREENS } from '@/Navigation/routes';
@@ -17,6 +21,11 @@ import { SettingsSection } from './SettingsSection';
 export const AboutSection = (): ReactNode => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [loadDemoJourneys, { isLoading }] = useLoadDemoJourneysMutation();
+  const [loadTestMemories, { isLoading: loadingTest }] = useLoadTestMemoriesMutation();
+  const [removeTestMemories, { isLoading: removingTest }] = useRemoveTestMemoriesMutation();
+
+  const messageOf = (e: unknown): string | undefined =>
+    typeof e === 'object' && e !== null && 'message' in e ? String(e.message) : undefined;
 
   const onLoadDemo = async (): Promise<void> => {
     try {
@@ -25,9 +34,28 @@ export const AboutSection = (): ReactNode => {
         showToast.success(`${formatCount(added, 'demo journey', 'demo journeys')} added.`);
       else showToast.info('Demo journeys are already here.');
     } catch (e) {
-      const message =
-        typeof e === 'object' && e !== null && 'message' in e ? String(e.message) : undefined;
-      showToast.error("Couldn't load the demo journeys", message);
+      showToast.error("Couldn't load the demo journeys", messageOf(e));
+    }
+  };
+
+  // Dev tools for the performance checks; the buttons render only in dev builds.
+  const onLoadTest = async (): Promise<void> => {
+    try {
+      const { added } = await loadTestMemories().unwrap();
+      if (added > 0)
+        showToast.success(`${formatCount(added, 'test memory', 'test memories')} added.`);
+      else showToast.info('Test memories are already here.');
+    } catch (e) {
+      showToast.error("Couldn't load the test memories", messageOf(e));
+    }
+  };
+
+  const onRemoveTest = async (): Promise<void> => {
+    try {
+      const { removed } = await removeTestMemories().unwrap();
+      showToast.info(`${formatCount(removed, 'test memory', 'test memories')} removed.`);
+    } catch (e) {
+      showToast.error("Couldn't remove the test memories", messageOf(e));
     }
   };
 
@@ -53,11 +81,25 @@ export const AboutSection = (): ReactNode => {
         }
       />
       {__DEV__ ? (
-        <AppButton
-          label="Open UI kit"
-          variant="secondary"
-          onPress={() => navigation.navigate(SCREENS.Kit)}
-        />
+        <>
+          <AppButton
+            label="Open UI kit"
+            variant="secondary"
+            onPress={() => navigation.navigate(SCREENS.Kit)}
+          />
+          <AppButton
+            label="Load 1,000 test memories"
+            variant="secondary"
+            loading={loadingTest}
+            onPress={onLoadTest}
+          />
+          <AppButton
+            label="Remove test memories"
+            variant="secondary"
+            loading={removingTest}
+            onPress={onRemoveTest}
+          />
+        </>
       ) : null}
     </SettingsSection>
   );

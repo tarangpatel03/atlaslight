@@ -1,13 +1,12 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState, type ReactNode } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { useGetJourneyQuery } from '@/api/journeys.api';
-import { EmptyState } from '@/components/feedback';
+import { DetailSkeleton, EmptyState } from '@/components/feedback';
 import { FormFrame } from '@/components/layout';
 import { useWindowClass } from '@/hooks/useWindowClass';
 import type { RootStackParamList } from '@/Navigation/navigation.types';
 import { SCREENS } from '@/Navigation/routes';
-import { colors } from '@/theme/colors';
 import { space } from '@/theme/layout';
 import { JourneyForm } from './subcomponents';
 import { styles } from './style';
@@ -44,7 +43,7 @@ export const JourneyFormScreen = ({ navigation, route }: JourneyFormScreenProps)
               onAction={close}
             />
           ) : (
-            <ActivityIndicator color={colors.amber} />
+            <DetailSkeleton />
           )}
         </View>
       </FormFrame>

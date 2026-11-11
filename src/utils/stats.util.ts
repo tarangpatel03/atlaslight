@@ -60,13 +60,19 @@ export type Stats = {
 
 const yearOf = (ms: number): number => new Date(ms).getFullYear();
 
+/** Lookups against the bundled region data, kept across calls; cleared when it grows past the cap. */
+const bundledCache = new Map<string, Region | null>();
+const MAX_CACHED_CELLS = 20_000;
+
 /**
  * Looks up the country and state of every memory once. The lookup is the costly part of the stats,
  * so callers keep the result and only rerun `computeStats` when the chip changes.
  */
 export const resolveRegions = (stops: StatsStop[], data: RegionData = bundled): ResolvedStop[] => {
-  // Memories of one trip often share a spot; each ~10 m cell is looked up once.
-  const cache = new Map<string, Region | null>();
+  // Memories of one trip often share a spot; each ~10 m cell is looked up once. With the bundled data
+  // the answers are kept between calls, so a refetch after adding one memory does not redo 1,000 lookups.
+  if (data === bundled && bundledCache.size > MAX_CACHED_CELLS) bundledCache.clear();
+  const cache = data === bundled ? bundledCache : new Map<string, Region | null>();
   return stops.map((stop) => {
     const key = `${stop.latitude.toFixed(4)},${stop.longitude.toFixed(4)}`;
     let region = cache.get(key);

@@ -1,0 +1,4 @@
+<resources>
+    <!-- Same value as `colors.bg` in src/theme/colors.ts: the launch screen and the in-app splash match. -->
+    <color name="splash_bg">#0a0e14</color>
+</resources>

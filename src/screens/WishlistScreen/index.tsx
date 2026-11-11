@@ -1,6 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSavePlaceMutation } from '@/api/places.api';
 import {
@@ -10,16 +11,19 @@ import {
   type WishlistEntry,
 } from '@/api/wishlist.api';
 import { AppText, Icon } from '@/components/brand';
-import { EmptyState } from '@/components/feedback';
+import { EmptyState, SkeletonBlock } from '@/components/feedback';
 import { FormFrame, SidePanelFrame } from '@/components/layout';
 import { useWindowClass } from '@/hooks/useWindowClass';
 import type { RootStackParamList } from '@/Navigation/navigation.types';
 import { SCREENS } from '@/Navigation/routes';
 import { space } from '@/theme/layout';
+import { durations } from '@/theme/motion';
 import type { PlaceSuggestion } from '@/utils/photon.util';
 import { showToast } from '@/utils/toast.util';
 import { styles } from './style';
 import { AddPlace, WishlistRow } from './subcomponents';
+
+const WISHLIST_PLACEHOLDERS = ['a', 'b', 'c'];
 
 type WishlistScreenProps = NativeStackScreenProps<RootStackParamList, typeof SCREENS.Wishlist>;
 
@@ -66,7 +70,15 @@ export const WishlistScreen = ({ navigation }: WishlistScreenProps): ReactNode =
         />
       );
     }
-    if (data === undefined) return null;
+    if (data === undefined) {
+      return (
+        <View style={styles.list}>
+          {WISHLIST_PLACEHOLDERS.map((key) => (
+            <SkeletonBlock key={key} height={64} />
+          ))}
+        </View>
+      );
+    }
     if (data.length === 0) {
       return (
         <EmptyState
@@ -76,11 +88,11 @@ export const WishlistScreen = ({ navigation }: WishlistScreenProps): ReactNode =
       );
     }
     return (
-      <View style={styles.list}>
+      <Animated.View style={styles.list} entering={FadeIn.duration(durations.base)}>
         {data.map((entry) => (
           <WishlistRow key={entry.id} entry={entry} onRemove={(item) => void remove(item)} />
         ))}
-      </View>
+      </Animated.View>
     );
   })();
 

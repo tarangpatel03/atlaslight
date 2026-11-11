@@ -2,6 +2,22 @@
 
 An offline-first travel journal. Record journeys, attach memories (photos, videos, notes, moods) to places, and watch one dark world map fill with amber pins and aurora routes. Everything is stored on the device: no backend, no accounts, no sync. Portfolio project for React Native roles. What it does: [docs/project-spec.md](docs/project-spec.md).
 
+## Screenshots
+
+Taken on a tablet (landscape, with the side panels) and on a phone-size screen, from the release build with the demo journeys loaded. The layout follows the window size, not the device: phones get a floating tab bar and bottom sheets, wider windows a rail and a right-hand panel.
+
+| Map                                                                                                     | Journeys                                                                                        |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| ![Map with photo pins, an aurora route and the memory panel](docs/screenshots/tablet-map.jpg)           | ![Journeys grid with the journey panel](docs/screenshots/tablet-journeys.jpg)                   |
+| **Journey detail**                                                                                      | **Memory detail**                                                                               |
+| ![Journey with numbers, route map and timeline](docs/screenshots/tablet-journey.jpg)                    | ![Memory with photo, mood, note and place over the journey](docs/screenshots/tablet-memory.jpg) |
+| **Stats**                                                                                               | **Wishlist**                                                                                    |
+| ![Stats with distance, countries, scratch map and journeys per year](docs/screenshots/tablet-stats.jpg) | ![Wishlist panel with three places](docs/screenshots/tablet-wishlist.jpg)                       |
+
+| Map                                                              | Journeys                                                    | Journey detail                                              | Stats                                            |
+| ---------------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------ |
+| ![Phone Map with a bottom sheet](docs/screenshots/phone-map.jpg) | ![Phone Journeys list](docs/screenshots/phone-journeys.jpg) | ![Phone Journey detail](docs/screenshots/phone-journey.jpg) | ![Phone Stats](docs/screenshots/phone-stats.jpg) |
+
 ## Stack
 
 | Part     | Choice                                                                                                          |
@@ -29,7 +45,7 @@ An offline-first travel journal. Record journeys, attach memories (photos, video
 4. `yarn install`
 5. `yarn start` in one terminal (Metro), `yarn android` in another. No environment file is needed.
 
-The Settings tab has **Load demo journeys**: it adds 7 sample journeys with photos (run it again and nothing is duplicated). In the memory form, **Found in your photos** asks for photo access (and photo locations) the first time it is used; the system photo picker hides GPS, so places come from that card or from place search. Dev builds add an **Open UI kit** button to the Settings tab (`src/screens/KitScreen`), a gallery of the UI components; release builds do not include it.
+The Settings tab has **Load demo journeys**: it adds 7 sample journeys with photos (run it again and nothing is duplicated). In the memory form, **Found in your photos** asks for photo access (and photo locations) the first time it is used; the system photo picker hides GPS, so places come from that card or from place search. Dev builds add three buttons to the Settings tab, none of them in release builds: **Open UI kit** (`src/screens/KitScreen`, a gallery of the UI components), **Load 1,000 test memories** (20 generated journeys of 50 memories over 40 cities, for performance checks; run it again and nothing is duplicated) and **Remove test memories**.
 
 The Map tab uses MapLibre with OpenFreeMap vector tiles (no API key). Tiles need a network connection the first time; the map shows no attribution button (owner decision). Journey detail shows the journey's own route map (`components/map/JourneyRouteMap.tsx`); Replay route redraws the line over 6 seconds. The map there is fixed (no pan or zoom, so it never fights the page scroll); tap a dot to open the memory. Memory detail has a small fixed map of the place. In the memory form the place can come from search, **My location** (one position fix, asked only when you tap it) or **Pick on map** (`screens/MapPickScreen`: pan the map under the fixed mark, then Use this spot).
 
@@ -83,6 +99,51 @@ Schema is in `src/db/schema/`. After a schema change run `yarn db:generate`, whi
 | `yarn db:generate`  | Generate a Drizzle migration |
 | `yarn format`       | Prettier write               |
 | `yarn format:check` | Prettier check               |
+
+## Release build
+
+The release APK is signed with your own keystore, which stays outside the repo (`*.jks` is git-ignored) and needs no Play Console account.
+
+1. Create the keystore once (keep the file and both passwords safe; a later APK can only update this one if it is signed with the same key):
+   `keytool -genkeypair -v -keystore C:\Users\<you>\.atlaslight\release.jks -alias atlaslight -keyalg RSA -keysize 2048 -validity 10000`
+2. Add four lines to `gradle.properties` in your Gradle user home (`~/.gradle/`, or `%GRADLE_USER_HOME%` when that variable is set; Gradle reads only that one) and not to the repo: `ATLASLIGHT_STORE_FILE` (the keystore path, with forward slashes), `ATLASLIGHT_STORE_PASSWORD`, `ATLASLIGHT_KEY_ALIAS` (`atlaslight`) and `ATLASLIGHT_KEY_PASSWORD`. Without them `assembleRelease` still works but signs with the debug key and warns.
+3. From `android/`: `./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a` (one CPU type: a small APK for every modern phone and tablet). The APK is `android/app/build/outputs/apk/release/app-release.apk` and the R8 `mapping.txt` in `android/app/build/outputs/mapping/release/` reads its crash traces.
+
+Release builds are minified (R8) and shrink resources. A debug build and a release build have different signatures, so uninstall one before installing the other (that removes the app's data; export a backup in Settings first).
+
+## Install the APK
+
+The release APK (`app-release.apk`, built as above) is for arm64 phones and tablets and is not on the Play Store. Copy it to the device and open it (allow installs from that source when Android asks), or connect over USB and run `adb install -r app-release.apk`. Some phones also ask for USB installs to be allowed in Developer options. Everything works offline except map tiles and place search, which need a network the first time. An APK signed with a different key (for example a debug build) cannot replace this one, so uninstall first and use Settings > Back up to a file beforehand.
+
+## Performance and size
+
+Measured on one Android tablet (90 Hz) with the release build (Hermes, R8), holding 1,031 memories in 27 journeys (1,000 generated ones plus the demo set):
+
+| What                                                     | Result                                                                                        |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Cold start (`am start -W` TotalTime, 5 runs)             | median 514 ms (483 to 690 ms)                                                                 |
+| APK size (arm64 only)                                    | 50.7 MB                                                                                       |
+| Map pins query, 1,031 memories                           | 108 ms                                                                                        |
+| Stats: read the rows, then look up each memory's country | 66 ms, then 249 ms on the first run (3 ms afterwards: the lookups are kept between refetches) |
+| Stats numbers (`computeStats`)                           | 15 ms                                                                                         |
+| Map pan at world zoom, 1,031 pins, clusters and routes   | 11.1 ms per frame at the median, 11.2 ms at the 99th percentile (the 90 Hz limit)             |
+| Journeys grid scroll, 27 cards                           | 718 frames, 0.7% janky, 99th percentile 28 ms                                                 |
+
+Clustering is done by MapLibre on the native side; photo pins are limited to 40 and start at zoom 6; lists use FlashList. How: `adb shell am start -W` for start-up, `dumpsys gfxinfo` for list frames, `dumpsys SurfaceFlinger --latency` for the map surface, and temporary timing logs around the queries (removed). The same queries took 205 ms, 127 ms plus 605 ms and 204 ms on the debug build. Not measured: photo pins at zoom 6 and above with 1,000 dots, a real phone, iOS. The 1,000 test memories come from the dev-only **Load 1,000 test memories** button (see Setup); release builds do not have it.
+
+## Data sources and licences
+
+| What                                                                       | Used for                           | Licence and terms                                                                        |
+| -------------------------------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------- |
+| [OpenFreeMap](https://openfreemap.org/)                                    | Map tiles, glyphs                  | Free, no key; map data © OpenStreetMap contributors (ODbL)                               |
+| [Photon](https://photon.komoot.io/) by Komoot                              | Place search and reverse lookup    | OpenStreetMap data (ODbL); public instance, fair use (searches are debounced and cached) |
+| [Natural Earth](https://www.naturalearthdata.com/)                         | Countries and Indian states shapes | Public domain (see Map data)                                                             |
+| [MapLibre React Native](https://github.com/maplibre/maplibre-react-native) | Map view                           | MIT                                                                                      |
+| Fraunces, Manrope, Space Grotesk                                           | Fonts                              | SIL Open Font License 1.1                                                                |
+| [Lucide](https://lucide.dev/) icons                                        | Icons                              | ISC                                                                                      |
+| Demo photos (`src/assets/demo/photos/`)                                    | Sample journeys                    | Source and licence to be added                                                           |
+
+The app icon's source is not recorded yet. The project itself has no licence file yet.
 
 ## Docs
 

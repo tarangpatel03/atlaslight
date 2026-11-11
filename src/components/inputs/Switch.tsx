@@ -3,7 +3,6 @@ import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
-  useReducedMotion,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
@@ -25,15 +24,13 @@ const TRAVEL = TRACK_WIDTH - THUMB - INSET * 2;
 /** Extends the 32 dp track to the 48 dp touch minimum. */
 const HIT_SLOP = (sizes.touchMin - TRACK_HEIGHT) / 2;
 
-/** On/off switch: amber when on. The thumb springs; with Reduce Motion it jumps. */
+/** On/off switch: amber when on. The thumb springs. */
 export const Switch = ({ value, onValueChange, disabled = false }: SwitchProps): ReactNode => {
   const progress = useSharedValue(value ? 1 : 0);
-  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const target = value ? 1 : 0;
-    progress.set(reduceMotion ? target : withSpring(target, springs.standard));
-  }, [value, reduceMotion, progress]);
+    progress.set(withSpring(value ? 1 : 0, springs.standard));
+  }, [value, progress]);
 
   // get() instead of .value keeps the React Compiler lint rules happy with shared values.
   const trackStyle = useAnimatedStyle(() => ({

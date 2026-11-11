@@ -1,5 +1,5 @@
 import type { WithSpringConfig, WithTimingConfig } from 'react-native-reanimated';
-import { Easing } from 'react-native-reanimated';
+import { Easing, LinearTransition } from 'react-native-reanimated';
 
 export const springs = {
   /** Presses, pins, switches. */
@@ -22,6 +22,12 @@ export const timings = {
   enter: { duration: durations.base, easing: Easing.out(Easing.cubic) },
   countUp: { duration: durations.countUp, easing: Easing.out(Easing.cubic) },
 } satisfies Record<string, WithTimingConfig>;
+
+/** Rows sliding into place when a list item is added, removed or moved (the `gentle` spring). */
+export const rowTransition = LinearTransition.springify()
+  .damping(springs.gentle.damping)
+  .stiffness(springs.gentle.stiffness)
+  .mass(springs.gentle.mass);
 
 /** Scale applied while a pressable is held. */
 export const PRESS_SCALE = 0.97;

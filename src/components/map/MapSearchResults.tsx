@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import type { MapStopItem } from '@/api/map.api';
 import { AppText, Icon, type IconName } from '@/components/brand';
+import { usePressScale } from '@/hooks/usePressScale';
 import { colors } from '@/theme/colors';
 import { radius, sizes, space } from '@/theme/layout';
 import type { LocalSearchResults } from '@/utils/mapSearch.util';
@@ -31,21 +33,27 @@ interface RowProps {
   onPress: () => void;
 }
 
-const Row = ({ icon, title, subtitle, onPress }: RowProps): ReactNode => (
-  <Pressable onPress={onPress} style={styles.row}>
-    <Icon name={icon} size={18} color={colors.inkMuted} />
-    <View style={styles.rowText}>
-      <AppText variant="bodyStrong" numberOfLines={1}>
-        {title}
-      </AppText>
-      {subtitle ? (
-        <AppText variant="caption" color={colors.inkMuted} numberOfLines={1}>
-          {subtitle}
-        </AppText>
-      ) : null}
-    </View>
-  </Pressable>
-);
+const Row = ({ icon, title, subtitle, onPress }: RowProps): ReactNode => {
+  const { style, handlers } = usePressScale();
+
+  return (
+    <Pressable onPress={onPress} {...handlers}>
+      <Animated.View style={[styles.row, style]}>
+        <Icon name={icon} size={18} color={colors.inkMuted} />
+        <View style={styles.rowText}>
+          <AppText variant="bodyStrong" numberOfLines={1}>
+            {title}
+          </AppText>
+          {subtitle ? (
+            <AppText variant="caption" color={colors.inkMuted} numberOfLines={1}>
+              {subtitle}
+            </AppText>
+          ) : null}
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+};
 
 /** Glass list under the search bar: your journeys and memories first, then places from Photon. */
 export const MapSearchResults = ({

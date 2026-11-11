@@ -2,12 +2,10 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
   useBottomSheetSpringConfigs,
-  useBottomSheetTimingConfigs,
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
 import { useState, type ComponentRef, type ReactNode, type Ref } from 'react';
-import { StyleSheet } from 'react-native';
-import { useReducedMotion } from 'react-native-reanimated';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/theme/colors';
 import { radius, shadows, space } from '@/theme/layout';
@@ -57,23 +55,24 @@ export const AppBottomSheet = ({
   bottomInset,
 }: AppBottomSheetProps): ReactNode => {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   // The library's backdrop starts touchable and only turns "none" once the sheet moves (a mount race in
   // its own effect), so a closed sheet's backdrop would block the whole screen. Mount it only while open.
   const [opened, setOpened] = useState(index >= 0);
-  const reduceMotion = useReducedMotion();
   const springConfigs = useBottomSheetSpringConfigs(springs.gentle);
-  // Reduce Motion: no sliding, the sheet just appears.
-  const instantConfigs = useBottomSheetTimingConfigs({ duration: 0 });
 
   return (
     <BottomSheet
+      // A closed sheet keeps its old closed position when the window size changes (rotation, fold, split
+      // screen) and peeks out empty; a fresh sheet starts open or closed correctly.
+      key={`${width}x${height}`}
       ref={ref}
       index={index}
       snapPoints={snapPoints}
       bottomInset={bottomInset}
       enableDynamicSizing={false}
       enablePanDownToClose
-      animationConfigs={reduceMotion ? instantConfigs : springConfigs}
+      animationConfigs={springConfigs}
       backdropComponent={backdrop && opened ? renderBackdrop : undefined}
       onAnimate={(_from, to) => {
         if (to >= 0) setOpened(true);

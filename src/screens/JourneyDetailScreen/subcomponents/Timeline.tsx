@@ -1,10 +1,12 @@
 import type { ReactElement, ReactNode } from 'react';
-import type { ListRenderItemInfo } from 'react-native';
+import { StyleSheet, type ListRenderItemInfo } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import ReorderableList, {
   reorderItems,
   type ReorderableListReorderEvent,
 } from 'react-native-reorderable-list';
 import type { StopListItem } from '@/api/stops.api';
+import { durations, rowTransition } from '@/theme/motion';
 import { TimelineItem } from './TimelineItem';
 
 interface TimelineProps {
@@ -42,15 +44,22 @@ export const Timeline = ({
   );
 
   return (
-    <ReorderableList
-      data={stops}
-      keyExtractor={(stop) => stop.id}
-      renderItem={renderItem}
-      onReorder={handleReorder}
-      ListHeaderComponent={header}
-      ListEmptyComponent={empty}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: gutter, paddingBottom }}
-    />
+    <Animated.View style={styles.fill} entering={FadeIn.duration(durations.base)}>
+      <ReorderableList
+        data={stops}
+        keyExtractor={(stop) => stop.id}
+        renderItem={renderItem}
+        onReorder={handleReorder}
+        itemLayoutAnimation={rowTransition}
+        ListHeaderComponent={header}
+        ListEmptyComponent={empty}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: gutter, paddingBottom }}
+      />
+    </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+});

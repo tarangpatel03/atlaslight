@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { AppText } from '@/components/brand';
+import { usePressScale } from '@/hooks/usePressScale';
 import { colors } from '@/theme/colors';
 import { sizes, space } from '@/theme/layout';
 
@@ -16,6 +18,7 @@ interface SettingsRowProps {
 
 /** One label with an optional detail line and a control on the right. */
 export const SettingsRow = ({ label, detail, right, onPress }: SettingsRowProps): ReactNode => {
+  const { style, handlers } = usePressScale();
   const content = (
     <>
       <View style={styles.text}>
@@ -32,8 +35,8 @@ export const SettingsRow = ({ label, detail, right, onPress }: SettingsRowProps)
 
   if (!onPress) return <View style={styles.row}>{content}</View>;
   return (
-    <Pressable style={styles.row} onPress={onPress}>
-      {content}
+    <Pressable onPress={onPress} {...handlers}>
+      <Animated.View style={[styles.row, style]}>{content}</Animated.View>
     </Pressable>
   );
 };

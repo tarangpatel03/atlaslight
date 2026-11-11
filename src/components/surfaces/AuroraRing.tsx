@@ -1,11 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, {
-  useAnimatedProps,
-  useReducedMotion,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { auroraGradient, colors } from '@/theme/colors';
 import { timings } from '@/theme/motion';
@@ -21,23 +16,22 @@ interface AuroraRingProps {
   children?: ReactNode;
 }
 
-/** Progress ring with the aurora (teal to violet) arc. Fills once on mount; with Reduce Motion it is drawn filled. */
+/** Progress ring with the aurora (teal to violet) arc. Fills once on mount. */
 export const AuroraRing = ({
   progress,
   size = 96,
   strokeWidth = 8,
   children,
 }: AuroraRingProps): ReactNode => {
-  const reduceMotion = useReducedMotion();
   const target = Math.min(1, Math.max(0, progress));
-  const fill = useSharedValue(reduceMotion ? target : 0);
+  const fill = useSharedValue(0);
   const center = size / 2;
   const ringRadius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * ringRadius;
 
   useEffect(() => {
-    fill.set(reduceMotion ? target : withTiming(target, timings.countUp));
-  }, [target, reduceMotion, fill]);
+    fill.set(withTiming(target, timings.countUp));
+  }, [target, fill]);
 
   // get() instead of .value keeps the React Compiler lint rules happy with shared values.
   const arcProps = useAnimatedProps(() => ({

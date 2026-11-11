@@ -1,6 +1,7 @@
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useMemo, useState, type ReactNode } from 'react';
 import { View, type LayoutChangeEvent } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useGetJourneysQuery, type JourneyListItem } from '@/api/journeys.api';
 import { Fab } from '@/components/buttons';
 import { Screen } from '@/components/layout';
@@ -15,6 +16,7 @@ import {
   setSelectedJourneyId,
 } from '@/store/slices';
 import { sizes } from '@/theme/layout';
+import { durations } from '@/theme/motion';
 import { columnsForWidth } from '@/utils/grid.util';
 import {
   buildJourneyListRows,
@@ -111,7 +113,11 @@ export const JourneysScreen = (): ReactNode => {
   return (
     <Screen padded={false}>
       <View style={styles.root}>
-        <View style={styles.pane} onLayout={onPaneLayout}>
+        <Animated.View
+          style={styles.pane}
+          onLayout={onPaneLayout}
+          entering={FadeIn.duration(durations.base)}
+        >
           {isCompact ? (
             <JourneyRows
               rows={rows}
@@ -138,7 +144,7 @@ export const JourneysScreen = (): ReactNode => {
               <Fab onPress={startJourney} />
             </View>
           ) : null}
-        </View>
+        </Animated.View>
         {showPanel ? (
           <JourneyPanel journey={selected} onOpenJourney={openJourney} onOpenMemory={openMemory} />
         ) : null}

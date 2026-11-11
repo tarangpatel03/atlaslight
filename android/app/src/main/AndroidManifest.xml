@@ -23,6 +23,10 @@
       android:theme="@style/AppTheme"
       android:usesCleartextTraffic="${usesCleartextTraffic}"
       android:supportsRtl="true">
+      <!-- The demo photos are opened by name at run time (copyFileRes in demoAssets.service.ts), which the
+           release resource shrinker cannot see; naming them here keeps them in the APK. -->
+      <meta-data android:name="atlaslight.demo_photo_landscape" android:resource="@drawable/demo_landscape" />
+      <meta-data android:name="atlaslight.demo_photo_portrait" android:resource="@drawable/demo_portrait" />
       <activity
         android:name=".MainActivity"
         android:label="@string/app_name"

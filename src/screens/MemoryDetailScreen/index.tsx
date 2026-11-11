@@ -1,17 +1,16 @@
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useRef, useState, type ReactNode } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetJourneyQuery } from '@/api/journeys.api';
 import { useDeleteStopMutation, useGetStopQuery } from '@/api/stops.api';
-import { EmptyState } from '@/components/feedback';
+import { DetailSkeleton, EmptyState } from '@/components/feedback';
 import { Screen, SidePanelFrame } from '@/components/layout';
 import { ConfirmSheet, type AppBottomSheetRef } from '@/components/surfaces';
 import { useWindowClass } from '@/hooks/useWindowClass';
 import type { RootStackParamList } from '@/Navigation/navigation.types';
 import { SCREENS } from '@/Navigation/routes';
-import { colors } from '@/theme/colors';
 import { space } from '@/theme/layout';
 import { formatMemoryDeletion } from '@/utils/memory.util';
 import { showToast } from '@/utils/toast.util';
@@ -63,7 +62,7 @@ export const MemoryDetailScreen = ({ navigation, route }: MemoryDetailScreenProp
           onAction={close}
         />
       ) : (
-        <ActivityIndicator color={colors.amber} />
+        <DetailSkeleton />
       )}
     </View>
   );

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useGetMapStopsQuery, type MapStopItem } from '@/api/map.api';
 import { useGetWishlistQuery } from '@/api/wishlist.api';
 import { Fab } from '@/components/buttons';
@@ -75,7 +75,7 @@ export const MapScreen = (): ReactNode => {
   const { width, height } = useWindowDimensions();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useAppDispatch();
-  const { data, isError } = useGetMapStopsQuery();
+  const { data, isError, refetch } = useGetMapStopsQuery();
   const filter = useAppSelector(selectMapFilter);
   const selectedId = useAppSelector(selectSelectedStopId);
   const showVisitedRegions = useAppSelector(selectShowVisitedRegions);
@@ -129,8 +129,19 @@ export const MapScreen = (): ReactNode => {
   }));
 
   useEffect(() => {
-    if (isError) showToast.error('Could not load your memories', 'Reopen the map to try again.');
+    if (isError)
+      showToast.error(
+        'Could not load your memories',
+        "We'll try again when you return to the map.",
+      );
   }, [isError]);
+
+  // A failed load is retried when the tab regains focus (a successful read changes `isError` back).
+  useFocusEffect(
+    useCallback(() => {
+      if (isError) void refetch();
+    }, [isError, refetch]),
+  );
 
   // The opening view frames everything once the memories are in; an empty map keeps the world view.
   // It waits for the map to load: a camera move sent before that is dropped, so a cold start stayed on the world view.

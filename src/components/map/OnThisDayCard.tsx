@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { AppText, Icon } from '@/components/brand';
 import { Cover } from '@/components/cards';
+import { usePressScale } from '@/hooks/usePressScale';
 import { mediaUri } from '@/services/mediaStorage.service';
 import { colors } from '@/theme/colors';
 import { radius, shadows, space } from '@/theme/layout';
@@ -30,22 +32,25 @@ export const OnThisDayCard = ({
   onClose,
 }: OnThisDayCardProps): ReactNode => {
   const cover = mediaUri(coverThumbnailPath);
+  const { style, handlers } = usePressScale();
 
   return (
     <View style={styles.card}>
-      <Pressable onPress={onPress} style={styles.main}>
-        <Cover source={cover ? { uri: cover } : undefined} style={styles.cover} />
-        <View style={styles.text}>
-          <AppText variant="overline" color={colors.amber} numberOfLines={1}>
-            On this day · {formatRelativeDay(visitedAt)}
-          </AppText>
-          <AppText variant="subheading" numberOfLines={1}>
-            {title}
-          </AppText>
-          <AppText variant="caption" color={colors.inkMuted} numberOfLines={1}>
-            {journeyTitle}
-          </AppText>
-        </View>
+      <Pressable onPress={onPress} style={styles.pressable} {...handlers}>
+        <Animated.View style={[styles.main, style]}>
+          <Cover source={cover ? { uri: cover } : undefined} style={styles.cover} />
+          <View style={styles.text}>
+            <AppText variant="overline" color={colors.amber} numberOfLines={1}>
+              On this day · {formatRelativeDay(visitedAt)}
+            </AppText>
+            <AppText variant="subheading" numberOfLines={1}>
+              {title}
+            </AppText>
+            <AppText variant="caption" color={colors.inkMuted} numberOfLines={1}>
+              {journeyTitle}
+            </AppText>
+          </View>
+        </Animated.View>
       </Pressable>
       <Pressable onPress={onClose} hitSlop={space[2]} style={styles.close}>
         <Icon name="close" size={18} color={colors.inkMuted} />
@@ -66,7 +71,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.glassFallback,
     ...shadows.float,
   },
-  main: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  pressable: { flex: 1 },
+  main: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   cover: { width: COVER, height: COVER, borderRadius: radius.md },
   text: { flex: 1, gap: space[1] },
   close: { alignSelf: 'flex-start' },

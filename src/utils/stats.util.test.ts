@@ -104,6 +104,21 @@ describe('resolveRegions', () => {
     expect(resolved[1].region).toEqual({ countryCode: 'FR', countryName: 'France', state: null });
     expect(resolved[2].region).toBeNull();
   });
+
+  it('gives the same answer on a repeat call with the bundled data, and keeps fixtures apart', () => {
+    // Real coordinates: Mumbai is in India, Lisbon in Portugal.
+    const points = [
+      stop('a', 0, 72.8777, 1, { latitude: 19.076 }),
+      stop('a', 1, -9.1393, 1, { latitude: 38.7223 }),
+    ];
+    const first = resolveRegions(points);
+    const second = resolveRegions(points);
+    expect(second.map((s) => s.region)).toEqual(first.map((s) => s.region));
+    expect(first[0].region?.countryCode).toBe('IN');
+    expect(first[1].region?.countryCode).toBe('PT');
+    // The toy fixture puts (19.076, 72.8777) nowhere, so the bundled answers must not leak into it.
+    expect(resolveRegions([points[0]], toy)[0].region).toBeNull();
+  });
 });
 
 describe('computeStats: distance', () => {

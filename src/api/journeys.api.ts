@@ -8,6 +8,9 @@ import { nextJourneyColor } from '@/utils/journey.util';
 import { baseApi, runDb } from '@/api/baseApi';
 import { TAGS } from '@/api/tags';
 
+/** The message `getJourney` fails with when the journey is gone (for example just deleted). */
+export const JOURNEY_NOT_FOUND = 'Journey not found';
+
 export type JourneyListItem = Journey & {
   stopCount: number;
   photoCount: number;
@@ -162,7 +165,7 @@ export const journeysApi = baseApi.injectEndpoints({
             })
             .from(journeys)
             .where(eq(journeys.id, id));
-          if (!row) throw new Error('Journey not found');
+          if (!row) throw new Error(JOURNEY_NOT_FOUND);
           const distances = await routeDistances(id);
           return { ...row, distanceKm: distances.get(id) ?? 0 };
         }),

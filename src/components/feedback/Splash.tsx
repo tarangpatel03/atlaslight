@@ -1,12 +1,19 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, StatusBar, StyleSheet, View } from 'react-native';
+import { Image, StatusBar, StyleSheet, View } from 'react-native';
+import splashIcon from '@/assets/brand/splashIcon.png';
 import { colors } from '@/theme/colors';
 
-/** Shown while the stored session is read, so the app never opens on a blank screen. */
+/** Size the Android launch screen draws the icon at (see `launch_background.xml`), so the two line up. */
+const ICON_SIZE = 288;
+
+/**
+ * Shown while the database and settings load: the launch screen's dark ground and icon, so the app
+ * opens on one screen from the first frame to the first real one.
+ */
 export const Splash = (): ReactNode => (
   <View style={styles.root}>
     <StatusBar barStyle="light-content" />
-    <ActivityIndicator color={colors.amber} />
+    <Image source={splashIcon} style={styles.icon} />
   </View>
 );
 
@@ -17,4 +24,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.bg,
   },
+  icon: { width: ICON_SIZE, height: ICON_SIZE },
 });

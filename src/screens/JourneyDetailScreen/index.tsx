@@ -1,8 +1,8 @@
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, type ReactNode } from 'react';
-import { ActivityIndicator, ScrollView, View } from 'react-native';
-import { useGetJourneyQuery } from '@/api/journeys.api';
+import { ScrollView, View } from 'react-native';
+import { JOURNEY_NOT_FOUND, useGetJourneyQuery } from '@/api/journeys.api';
 import {
   useGetStopsByJourneyQuery,
   useReorderStopsMutation,
@@ -10,7 +10,7 @@ import {
 } from '@/api/stops.api';
 import { AppText } from '@/components/brand';
 import { AppButton } from '@/components/buttons';
-import { EmptyState } from '@/components/feedback';
+import { DetailSkeleton, EmptyState } from '@/components/feedback';
 import { Screen } from '@/components/layout';
 import { useWindowClass } from '@/hooks/useWindowClass';
 import type { RootStackParamList } from '@/Navigation/navigation.types';
@@ -43,14 +43,16 @@ export const JourneyDetailScreen = ({ route }: JourneyDetailScreenProps): ReactN
   const { windowClass, margin } = useWindowClass();
   const isCompact = windowClass === 'compact';
 
-  const { data: journey, isError } = useGetJourneyQuery(journeyId);
+  const { data: journey, isError, error } = useGetJourneyQuery(journeyId);
   const { data: stops } = useGetStopsByJourneyQuery(journeyId);
   const [reorderStops] = useReorderStopsMutation();
 
-  // The journey is gone (deleted from its edit form): leave instead of showing an error.
+  // The journey is gone (deleted from its edit form): leave instead of flashing an error.
+  const gone =
+    isError && error !== undefined && 'message' in error && error.message === JOURNEY_NOT_FOUND;
   useEffect(() => {
-    if (isError) navigation.goBack();
-  }, [isError, navigation]);
+    if (gone) navigation.goBack();
+  }, [gone, navigation]);
 
   const goBack = (): void => navigation.goBack();
   const edit = (): void => navigation.navigate(SCREENS.JourneyForm, { journeyId });
@@ -67,7 +69,16 @@ export const JourneyDetailScreen = ({ route }: JourneyDetailScreenProps): ReactN
     return (
       <Screen padded={false}>
         <View style={styles.status}>
-          <ActivityIndicator color={colors.amber} />
+          {isError && !gone ? (
+            <EmptyState
+              title="Couldn't open this journey"
+              message="Something went wrong reading it from this device."
+              actionLabel="Close"
+              onAction={goBack}
+            />
+          ) : (
+            <DetailSkeleton />
+          )}
         </View>
       </Screen>
     );

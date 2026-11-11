@@ -54,7 +54,14 @@ export const StopPins = ({
     event.stopPropagation();
     const { cluster_id: clusterId, id } = feature.properties ?? {};
     if (typeof clusterId === 'number') {
-      onPressCluster(clusterId, event.nativeEvent.lngLat);
+      // Fly to the cluster's own centre: the press point can lie far from it (a tap on the edge of a big
+      // cluster flew to a street-level view of the wrong city).
+      if (feature.geometry.type === 'Point') {
+        const [longitude, latitude] = feature.geometry.coordinates;
+        onPressCluster(clusterId, [longitude, latitude]);
+      } else {
+        onPressCluster(clusterId, event.nativeEvent.lngLat);
+      }
     } else if (typeof id === 'string') {
       onPressStop(id);
     }

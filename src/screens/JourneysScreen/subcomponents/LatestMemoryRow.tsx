@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { AppText } from '@/components/brand';
 import { Cover } from '@/components/cards';
+import { usePressScale } from '@/hooks/usePressScale';
 import { colors } from '@/theme/colors';
 import { radius, space } from '@/theme/layout';
 import { formatShortDateTime } from '@/utils/format.util';
@@ -22,19 +24,25 @@ export const LatestMemoryRow = ({
   visitedAt,
   coverUri,
   onPress,
-}: LatestMemoryRowProps): ReactNode => (
-  <Pressable onPress={onPress} style={styles.row}>
-    <Cover source={coverUri ? { uri: coverUri } : undefined} style={styles.thumb} />
-    <View style={styles.text}>
-      <AppText variant="bodyStrong" numberOfLines={1}>
-        {title}
-      </AppText>
-      <AppText variant="coord" color={colors.inkSubtle}>
-        {formatShortDateTime(visitedAt)}
-      </AppText>
-    </View>
-  </Pressable>
-);
+}: LatestMemoryRowProps): ReactNode => {
+  const { style, handlers } = usePressScale();
+
+  return (
+    <Pressable onPress={onPress} {...handlers}>
+      <Animated.View style={[styles.row, style]}>
+        <Cover source={coverUri ? { uri: coverUri } : undefined} style={styles.thumb} />
+        <View style={styles.text}>
+          <AppText variant="bodyStrong" numberOfLines={1}>
+            {title}
+          </AppText>
+          <AppText variant="coord" color={colors.inkSubtle}>
+            {formatShortDateTime(visitedAt)}
+          </AppText>
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+};
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
