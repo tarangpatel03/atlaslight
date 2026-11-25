@@ -39,7 +39,10 @@ jobs:
           ORG_GRADLE_PROJECT_ATLASLIGHT_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           ORG_GRADLE_PROJECT_ATLASLIGHT_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           ORG_GRADLE_PROJECT_ATLASLIGHT_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+        # gradlew loses its executable bit when committed from Windows.
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 
       - name: Publish to the GitHub release
         env:
