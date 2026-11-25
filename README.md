@@ -102,12 +102,11 @@ Schema is in `src/db/schema/`. After a schema change run `yarn db:generate`, whi
 
 ## Release build
 
-The release APK is signed with your own keystore, which stays outside the repo (`*.jks` is git-ignored) and needs no Play Console account.
+The signed release APK is built only by CI (`.github/workflows/release.yml`); the release keystore lives only in GitHub secrets, never on a dev machine or in the repo (`*.jks` is git-ignored).
 
-1. Create the keystore once (keep the file and both passwords safe; a later APK can only update this one if it is signed with the same key):
-   `keytool -genkeypair -v -keystore C:\Users\<you>\.atlaslight\release.jks -alias atlaslight -keyalg RSA -keysize 2048 -validity 10000`
-2. Add four lines to `gradle.properties` in your Gradle user home (`~/.gradle/`, or `%GRADLE_USER_HOME%` when that variable is set; Gradle reads only that one) and not to the repo: `ATLASLIGHT_STORE_FILE` (the keystore path, with forward slashes), `ATLASLIGHT_STORE_PASSWORD`, `ATLASLIGHT_KEY_ALIAS` (`atlaslight`) and `ATLASLIGHT_KEY_PASSWORD`. Without them `assembleRelease` still works but signs with the debug key and warns.
-3. From `android/`: `./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a` (one CPU type: a small APK for every modern phone and tablet). The APK is `android/app/build/outputs/apk/release/app-release.apk` and the R8 `mapping.txt` in `android/app/build/outputs/mapping/release/` reads its crash traces.
+1. Once, add these repository secrets: `KEYSTORE_BASE64` (the keystore file, base64-encoded), `KEYSTORE_PASSWORD`, `KEY_ALIAS` and `KEY_PASSWORD`. A later APK can only update an installed one if it is signed with the same key, so keep a safe copy of the keystore.
+2. Push to `main`. CI builds the arm64 APK, signs it and publishes it as a new GitHub release (`build-<run number>`) with `atlaslight-build-<run number>.apk` attached.
+3. Local build (debug-signed, for testing only): from `android/`, `./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a`. The APK is `android/app/build/outputs/apk/release/app-release.apk` and the R8 `mapping.txt` in `android/app/build/outputs/mapping/release/` reads its crash traces.
 
 Release builds are minified (R8) and shrink resources. A debug build and a release build have different signatures, so uninstall one before installing the other (that removes the app's data; export a backup in Settings first).
 

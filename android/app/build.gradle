@@ -60,7 +60,7 @@ react {
  */
 def enableProguardInReleaseBuilds = true
 
-/** True when the own release keystore is configured on this machine (all four properties set). */
+/** True when the release keystore is configured (CI only; all four properties set). */
 def hasReleaseKeystore = ['ATLASLIGHT_STORE_FILE', 'ATLASLIGHT_STORE_PASSWORD', 'ATLASLIGHT_KEY_ALIAS', 'ATLASLIGHT_KEY_PASSWORD']
     .every { project.hasProperty(it) }
 if (!hasReleaseKeystore) {
@@ -100,7 +100,7 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        // The keystore lives outside the repo; its path and passwords come from ~/.gradle/gradle.properties.
+        // Only CI has the keystore; it passes the path and passwords as Gradle properties (see release.yml).
         if (hasReleaseKeystore) {
             release {
                 storeFile file(project.property('ATLASLIGHT_STORE_FILE'))
@@ -115,8 +115,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Signed with the own keystore when its four properties are set (see the README, Release
-            // build); without them the build still works, signed with the debug key.
+            // Signed with the release keystore when CI sets its four properties (see the README, Release
+            // build); without them (local builds) it is signed with the debug key.
             signingConfig hasReleaseKeystore ? signingConfigs.release : signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             shrinkResources enableProguardInReleaseBuilds
